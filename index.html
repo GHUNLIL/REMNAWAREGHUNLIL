@@ -1,0 +1,1729 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Remnawave Xray Config Generator v2</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+:root{--bg:#08090d;--bg2:#0d0f17;--bg3:#12151f;--bg4:#181c28;--border:#1e2235;--border2:#252a3d;--text:#e2e8f8;--text2:#8891b0;--text3:#525a75;--accent:#4f7bff;--accent2:#7c5cff;--green:#22d97a;--orange:#ff8c42;--red:#ff4f6a;--yellow:#ffd166;--mono:'JetBrains Mono',monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);min-height:100vh;display:flex;flex-direction:column;font-size:12px}
+.header{border-bottom:1px solid var(--border);padding:11px 18px;display:flex;align-items:center;justify-content:space-between;background:var(--bg2);position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:9px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.logo-text{font-size:12px;font-weight:700;letter-spacing:2px;color:var(--accent)}
+.logo-sub{color:var(--text3);font-size:10px}
+.badge{font-size:9px;padding:2px 7px;border:1px solid var(--border2);border-radius:3px;color:var(--text3)}
+.main{display:flex;flex:1;overflow:hidden;height:calc(100vh - 43px)}
+.left{width:470px;min-width:470px;border-right:1px solid var(--border);overflow-y:auto;background:var(--bg2)}
+.right{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.sec-head{padding:9px 13px;display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border-bottom:1px solid var(--border);border-top:1px solid var(--border);position:sticky;top:0;z-index:5}
+.sec-title{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
+.t-green{color:var(--green)}.t-orange{color:var(--orange)}.t-purple{color:var(--accent2)}.t-blue{color:var(--accent)}.t-yellow{color:var(--yellow)}
+.card{margin:7px;border:1px solid var(--border2);border-radius:6px;background:var(--bg3)}
+.card-head{padding:7px 9px;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02)}
+.card-num{color:var(--text3);font-size:10px;min-width:20px}
+.pbadge{font-size:9px;font-weight:700;letter-spacing:1px;padding:2px 5px;border-radius:3px;text-transform:uppercase;white-space:nowrap}
+.pb-ss{background:rgba(79,123,255,.15);color:var(--accent);border:1px solid rgba(79,123,255,.3)}
+.pb-vless{background:rgba(124,92,255,.15);color:var(--accent2);border:1px solid rgba(124,92,255,.3)}
+.pb-mixed{background:rgba(34,217,122,.15);color:var(--green);border:1px solid rgba(34,217,122,.3)}
+.pb-socks5{background:rgba(255,140,66,.15);color:var(--orange);border:1px solid rgba(255,140,66,.3)}
+.pb-direct{background:rgba(255,209,102,.15);color:var(--yellow);border:1px solid rgba(255,209,102,.3)}
+.card-tag{flex:1;color:var(--text2);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-port{color:var(--accent);font-size:11px;margin-right:3px}
+.btn-x{background:none;border:none;cursor:pointer;color:var(--text3);font-size:12px;padding:1px 4px;border-radius:3px;line-height:1;transition:color .15s,background .15s}
+.btn-x:hover{color:var(--red);background:rgba(255,79,106,.1)}
+.card-body{padding:9px;display:flex;flex-direction:column;gap:6px}
+.row{display:flex;gap:6px}
+.fg{display:flex;flex-direction:column;gap:3px;flex:1}
+.lbl{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3)}
+input,select,textarea{background:var(--bg);border:1px solid var(--border2);border-radius:4px;padding:5px 7px;color:var(--text);font-family:var(--mono);font-size:11px;outline:none;transition:border-color .2s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+select{cursor:pointer}select option{background:var(--bg3)}
+textarea{resize:vertical;min-height:80px;line-height:1.5}
+.type-btns{display:flex;gap:3px;flex-wrap:wrap}
+.tb{padding:3px 8px;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;border:1px solid var(--border2);border-radius:3px;cursor:pointer;background:none;color:var(--text3);transition:all .15s;font-family:var(--mono)}
+.tb:hover{color:var(--text2)}
+.tb.a-ss{background:rgba(79,123,255,.15);color:var(--accent);border-color:rgba(79,123,255,.4)}
+.tb.a-vless{background:rgba(124,92,255,.15);color:var(--accent2);border-color:rgba(124,92,255,.4)}
+.tb.a-mixed{background:rgba(34,217,122,.15);color:var(--green);border-color:rgba(34,217,122,.4)}
+.tb.a-socks5{background:rgba(255,140,66,.15);color:var(--orange);border-color:rgba(255,140,66,.4)}
+.tb.a-direct{background:rgba(255,209,102,.15);color:var(--yellow);border-color:rgba(255,209,102,.4)}
+.btn-add{margin:7px;width:calc(100% - 14px);padding:7px;border:1px dashed var(--border2);border-radius:5px;background:none;color:var(--text3);font-size:11px;cursor:pointer;transition:all .2s;font-family:var(--mono)}
+.btn-add:hover{border-color:var(--accent);color:var(--accent);background:rgba(79,123,255,.05)}
+.opt-row{display:flex;align-items:center;justify-content:space-between;padding:8px 13px;border-bottom:1px solid var(--border)}
+.opt-name{font-size:11px;color:var(--text2)}.opt-sub{font-size:10px;color:var(--text3);margin-top:1px}
+.toggle{width:33px;height:18px;border-radius:9px;background:var(--border2);position:relative;cursor:pointer;transition:background .2s;border:none;flex-shrink:0}
+.toggle.on{background:var(--accent)}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:white;transition:transform .2s}
+.toggle.on::after{transform:translateX(15px)}
+.route-rows{padding:7px}
+.route-row{display:flex;align-items:center;gap:5px;padding:4px 7px;border:1px solid var(--border);border-radius:5px;margin-bottom:4px;background:var(--bg4)}
+.rr-in{color:var(--green);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}
+.rr-arr{color:var(--text3);font-size:11px}
+.rr-sel{flex:1;background:var(--bg);border:1px solid var(--border2);border-radius:3px;padding:3px 6px;color:var(--text);font-family:var(--mono);font-size:11px;outline:none;cursor:pointer}
+.rr-sel:focus{border-color:var(--orange)}
+.pre-head{padding:8px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg3);flex-shrink:0}
+.fname{font-size:11px;color:var(--text2)}
+.acts{display:flex;gap:5px}
+.btn-act{padding:4px 11px;border-radius:4px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid;transition:all .2s;font-family:var(--mono)}
+.btn-cp{background:rgba(79,123,255,.1);border-color:rgba(79,123,255,.3);color:var(--accent)}
+.btn-cp:hover,.btn-cp.ok{background:rgba(34,217,122,.1);border-color:rgba(34,217,122,.3);color:var(--green)}
+.btn-dl{background:rgba(34,217,122,.1);border-color:rgba(34,217,122,.3);color:var(--green)}
+.btn-dl:hover{background:rgba(34,217,122,.2)}
+.code-area{flex:1;overflow:auto;padding:13px}
+pre{font-size:11px;line-height:1.7;color:var(--text2);white-space:pre}
+.k{color:#7c9cff}.s{color:#a8e6a3}.n{color:#ffb86c}.b{color:#ff79c6}
+.stats{padding:6px 13px;border-top:1px solid var(--border);display:flex;gap:16px;background:var(--bg3);flex-shrink:0}
+.st{font-size:10px;color:var(--text3)}.st span{color:var(--accent)}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:200}
+.modal-bg.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:18px;width:560px;max-width:92vw;max-height:82vh;overflow-y:auto;display:flex;flex-direction:column;gap:11px}
+.modal h3{font-size:12px;color:var(--accent);letter-spacing:1px;text-transform:uppercase}
+.modal-sub{font-size:10px;color:var(--text3);line-height:1.7}
+.modal-acts{display:flex;gap:7px;justify-content:flex-end}
+.btn-green{padding:6px 14px;background:rgba(34,217,122,.15);border:1px solid rgba(34,217,122,.3);color:var(--green);border-radius:4px;font-family:var(--mono);font-size:11px;cursor:pointer;font-weight:700;transition:background .2s}
+.btn-green:hover{background:rgba(34,217,122,.25)}
+.btn-grey{padding:6px 14px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);border-radius:4px;font-family:var(--mono);font-size:11px;cursor:pointer}
+.btn-grey:hover{background:var(--bg4)}
+.parsed-preview{background:var(--bg);border:1px solid var(--border2);border-radius:4px;padding:7px;max-height:150px;overflow-y:auto}
+.pp-row{font-size:10px;color:var(--text2);padding:2px 0;border-bottom:1px solid var(--border);display:flex;gap:7px;align-items:center}
+.pp-row:last-child{border-bottom:none}
+.pp-num{color:var(--text3);min-width:18px}.pp-host{color:var(--accent);flex:1}.pp-port{color:var(--orange)}.pp-user{color:var(--green)}.pp-pass{color:var(--text3);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.warn{font-size:10px;color:var(--red);line-height:1.6}
+.loglvl-row{display:flex;align-items:center;justify-content:space-between;padding:8px 13px;border-bottom:1px solid var(--border)}
+.loglvl-row label{font-size:11px;color:var(--text2)}
+.divider{height:1px;background:var(--border);margin:3px 0}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.input-wrap{display:flex;gap:3px;align-items:center}
+.input-wrap input{flex:1}
+.gen-btn{background:none;border:1px solid var(--border2);border-radius:4px;padding:4px 7px;color:var(--text3);cursor:pointer;font-family:var(--mono);font-size:11px;white-space:nowrap;transition:all .15s;flex-shrink:0}
+.gen-btn:hover{border-color:var(--accent2);color:var(--accent2);background:rgba(124,92,255,.08)}
+.gen-btn.spin{animation:spin .4s ease}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.tb.a-vless-ws{background:rgba(255,209,102,.15);color:var(--yellow);border-color:rgba(255,209,102,.4)}
+.pb-vless-ws{background:rgba(255,209,102,.15);color:var(--yellow);border:1px solid rgba(255,209,102,.3)}
+.keypair-box{background:var(--bg);border:1px solid var(--border2);border-radius:4px;padding:6px 8px;font-size:10px;color:var(--text3);line-height:1.8}
+.keypair-box .kp-label{color:var(--text3);font-size:9px;letter-spacing:1px;text-transform:uppercase}
+.keypair-box .kp-val{color:var(--green);word-break:break-all;font-size:10px}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="logo"><div class="dot"></div><span class="logo-text">REMNAWAVE</span><span class="logo-sub">&nbsp;/ Xray Config Generator v3</span></div>
+  <div style="display:flex;gap:6px;align-items:center">
+    <button class="btn-act" style="padding:3px 9px;font-size:9px;background:rgba(255,209,102,.1);border-color:rgba(255,209,102,.3);color:var(--yellow)" onclick="openSaveSlots()">💾 配置存档</button>
+    <button class="btn-act" style="padding:3px 9px;font-size:9px;background:rgba(124,92,255,.1);border-color:rgba(124,92,255,.3);color:var(--accent2)" onclick="genAllKeys()">⚡ 一键生成密钥</button>
+    <span class="badge">v3</span>
+  </div>
+</div>
+<div class="main">
+  <div class="left" id="left">
+    <!-- 入站放最上面 -->
+    <div class="sec-head" style="top:0"><span class="sec-title t-green">入站 Inbounds</span>
+      <div style="display:flex;gap:4px">
+        <button class="btn-act btn-cp" style="padding:3px 8px;font-size:9px" onclick="openUriModal()">🔗 URI</button>
+        <button class="btn-act btn-cp" style="padding:3px 8px;font-size:9px" onclick="addInbound()">+ 添加</button>
+      </div>
+    </div>
+    <div id="inbounds-list"></div>
+
+    <!-- 出站 -->
+    <div class="sec-head"><span class="sec-title t-orange">出站 Outbounds</span>
+      <div style="display:flex;gap:4px">
+        <button class="btn-act btn-cp" style="padding:3px 8px;font-size:9px" onclick="openImport()">⇩ 批量导入</button>
+        <button class="btn-act" style="padding:3px 8px;font-size:9px;background:rgba(255,140,66,.1);border-color:rgba(255,140,66,.3);color:var(--orange)" onclick="openReplace()">⇄ 批量替换</button>
+        <button class="btn-act btn-dl" style="padding:3px 8px;font-size:9px" onclick="addOutbound()">+ 添加</button>
+      </div>
+    </div>
+    <div id="outbounds-list"></div>
+
+    <!-- 路由绑定 -->
+    <div class="sec-head"><span class="sec-title t-blue">路由绑定</span></div>
+    <div class="route-rows" id="routing-table"></div>
+
+    <!-- 全局设置放最下面 -->
+    <div class="sec-head"><span class="sec-title t-purple">全局设置 / 路由规则</span></div>
+    <div class="loglvl-row" style="flex-wrap:wrap;gap:8px">
+      <label>日志级别</label>
+      <select id="loglevel" style="width:120px" onchange="render()">
+        <option value="warning" selected>warning</option>
+        <option value="info">info</option>
+        <option value="none">none</option>
+        <option value="error">error</option>
+        <option value="debug">debug</option>
+      </select>
+      <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)">
+        <input type="checkbox" id="dnsLog" onchange="render()" style="width:auto;accent-color:var(--accent)"> DNS 日志
+      </label>
+    </div>
+    <!-- DNS 配置 -->
+    <div style="padding:9px 13px;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div><div style="font-size:11px;color:var(--text2);font-weight:600">DNS 配置</div>
+          <div style="font-size:10px;color:var(--text3)">启用后生成 dns 配置节 + dns-in 路由规则</div></div>
+        <button class="toggle" id="tog-dns-cfg" onclick="toggleDnsCfg()"></button>
+      </div>
+      <div id="dns-cfg-body" style="display:none;flex-direction:column;gap:6px">
+        <div class="row">
+          <div class="fg"><label class="lbl">DNS 服务器（逗号分隔）</label>
+            <input id="dns-servers" value="1.1.1.1,1.0.0.1" oninput="render()" placeholder="1.1.1.1,8.8.8.8"></div>
+          <div class="fg" style="max-width:150px"><label class="lbl">查询策略</label>
+            <select id="dns-strategy" onchange="render()">
+              <option value="UseIP">UseIP</option>
+              <option value="UseIPv4">UseIPv4</option>
+              <option value="UseIPv6">UseIPv6</option>
+              <option value="UseIPv4v6">UseIPv4v6</option>
+            </select></div>
+        </div>
+        <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)">
+          <input type="checkbox" id="dns-disable-cache" onchange="render()" style="width:auto;accent-color:var(--accent)"> 禁用 DNS 缓存（disableCache）
+        </label>
+      </div>
+    </div>
+    <div style="padding:9px 13px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:6px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:11px;color:var(--text2);font-weight:600">路由模式</div>
+          <div style="font-size:10px;color:var(--text3)" id="route-mode-desc">全走落地，按规则筛选直连</div>
+        </div>
+        <div style="display:flex;border:1px solid var(--border2);border-radius:5px;overflow:hidden">
+          <button id="mode-btn-full" onclick="setRouteMode('full')" style="padding:4px 10px;font-size:10px;font-weight:700;border:none;cursor:pointer;font-family:var(--mono);background:var(--accent);color:white;transition:all .15s">落地优先</button>
+          <button id="mode-btn-direct" onclick="setRouteMode('direct')" style="padding:4px 10px;font-size:10px;font-weight:700;border:none;cursor:pointer;font-family:var(--mono);background:var(--bg3);color:var(--text3);transition:all .15s">直连优先</button>
+        </div>
+      </div>
+    </div>
+    <div id="opts-area"></div>
+  </div>
+  <div class="right">
+    <div class="pre-head"><span class="fname">config.json</span><div class="acts"><button class="btn-act" style="background:rgba(124,92,255,.1);border-color:rgba(124,92,255,.3);color:var(--accent2);padding:4px 11px;font-size:10px;font-weight:700;cursor:pointer;border-radius:4px;font-family:var(--mono)" onclick="openPaste()">⇡ 粘贴导入</button><button class="btn-act btn-cp" id="copyBtn" onclick="copyConfig()">⎘ 复制</button><button class="btn-act btn-dl" onclick="downloadConfig()">↓ 下载</button></div></div>
+    <div class="code-area" id="code-area-wrap"><textarea id="preview" readonly spellcheck="false" style="width:100%;height:100%;background:transparent;border:none;outline:none;resize:none;font-family:var(--mono);font-size:11px;line-height:1.7;color:var(--text2);padding:0;cursor:text;white-space:pre"></textarea></div>
+    <div class="stats"><span class="st">入站 <span id="st-in">0</span></span><span class="st">出站 <span id="st-out">0</span></span><span class="st">路由规则 <span id="st-rules">0</span></span><span class="st">端口范围 <span id="st-ports">—</span></span><span class="st" id="st-conflict" style="color:var(--red);display:none">⚠ 端口冲突</span></div>
+
+<!-- Bulk Action Bar (multi-select outbounds) -->
+<div id="bulk-bar" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--bg2);border:1px solid var(--accent2);border-radius:8px;padding:10px 16px;z-index:300;box-shadow:0 8px 24px rgba(0,0,0,.5);display:none;align-items:center;gap:10px">
+  <span style="color:var(--accent2);font-size:12px;font-weight:700">已选 <span id="bulk-count">0</span> 个出站</span>
+  <button class="btn-act" style="background:rgba(79,123,255,.15);border-color:rgba(79,123,255,.4);color:var(--accent);padding:5px 10px;font-size:10px" onclick="openBulkReplace()">⇄ 批量替换地址/密码</button>
+  <button class="btn-act" style="background:rgba(255,79,106,.1);border-color:rgba(255,79,106,.3);color:var(--red);padding:5px 10px;font-size:10px" onclick="bulkDelete()">🗑 批量删除</button>
+  <button class="btn-act" style="padding:5px 10px;font-size:10px" onclick="clearObSel()">✕ 取消</button>
+</div>
+
+<!-- Bulk Replace Modal -->
+<div class="modal-bg" id="bulkReplaceModal">
+  <div class="modal" style="width:640px">
+    <h3>⇄ 批量替换所选出站（保留 Tag 名不变）</h3>
+    <div class="modal-sub">粘贴新节点列表（每行一条），按顺序依次替换已选的出站。<br>格式：<code>host:port:user:pass</code> 或 <code>host:port</code>。<br><strong style="color:var(--accent2)">Tag 名保持不变</strong>，只更新地址/端口/账号密码。</div>
+    <div class="fg">
+      <label class="lbl">新节点列表</label>
+      <textarea id="bulkReplaceText" rows="8" placeholder="gate.example.com:1000:user1:pass1&#10;gate.example.com:1001:user2:pass2" style="font-size:10px"></textarea>
+    </div>
+    <div style="font-size:10px;color:var(--text3);margin:6px 0">已选 <span id="bulk-replace-count" style="color:var(--accent)">0</span> 个出站，将按顺序依次替换</div>
+    <div class="modal-acts">
+      <button class="btn-grey" onclick="document.getElementById('bulkReplaceModal').classList.remove('open')">取消</button>
+      <button class="btn-green" onclick="doBulkReplace()">✓ 批量替换</button>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+<!-- Paste Import Modal -->
+<div class="modal-bg" id="pasteModal">
+  <div class="modal" style="width:700px">
+    <h3>⇡ 粘贴导入（JSON / URI）</h3>
+    <div class="modal-sub">支持三种格式混合粘贴：<br>
+      <span style="color:var(--accent)">① config.json</span> 完整配置文件<br>
+      <span style="color:var(--accent2)">② vless://…</span> VLESS+Reality 节点链接（作为入站导入）<br>
+      <span style="color:var(--green)">③ ss://…</span> Shadowsocks 节点链接（作为入站导入）<br>
+      每行一个 URI，或直接粘贴完整 JSON。
+    </div>
+    <div class="fg">
+      <label class="lbl">粘贴内容</label>
+      <textarea id="pasteText" rows="10" placeholder='vless://...&#10;ss://...&#10;或粘贴完整 config.json' style="font-size:10px;line-height:1.6"></textarea>
+    </div>
+    <div id="paste-result" style="font-size:11px;line-height:1.7"></div>
+    <div class="modal-acts">
+      <button class="btn-grey" onclick="closePaste()">取消</button>
+      <button class="btn-green" onclick="doPasteImport()">✓ 解析并导入</button>
+    </div>
+  </div>
+</div>
+
+<!-- Batch Import Modal -->
+<div class="modal-bg" id="importModal">
+  <div class="modal">
+    <h3>⇩ 批量导入出口节点</h3>
+    <div class="modal-sub">支持格式（每行一个，冒号分隔）：<br><span style="color:var(--accent)">host:port:username:password</span><br><span style="color:var(--text3)">例：gate.kookeey.info:1000:user123:pass456-US-DC-001</span></div>
+    <div class="fg"><label class="lbl">粘贴节点列表</label><textarea id="importText" rows="6" placeholder="gate.kookeey.info:1000:3938883-98333387:b07a2e14-US-13557818&#10;gate.kookeey.info:1001:3938883-98333387:b07a2e14-US-49596696" oninput="parseImport()"></textarea></div>
+    <div id="import-preview"></div>
+    <div class="row">
+      <div class="fg"><label class="lbl">出口协议</label>
+        <select id="importProto" onchange="updateImportUI()"><option value="socks5">SOCKS5</option><option value="http">HTTP(S)</option><option value="ss">Shadowsocks</option></select></div>
+      <div class="fg" id="import-ss-method" style="display:none"><label class="lbl">SS加密方式</label>
+        <select id="importSsMethod"><option value="aes-256-gcm">aes-256-gcm</option><option value="chacha20-ietf-poly1305">chacha20-ietf-poly1305</option><option value="2022-blake3-aes-256-gcm">2022-blake3-aes-256-gcm</option></select></div>
+    </div>
+    <div class="fg"><label class="lbl">自动生成入站协议（每个出口配一个入站）</label>
+      <select id="importInProto" onchange="updateImportUI()"><option value="none">不生成入站</option><option value="ss" selected>SS2022 入站</option><option value="mixed">MIXED 入站</option><option value="vless">VLESS + REALITY 入站</option><option value="vless-ws">VLESS + WS（CF反代）入站</option></select></div>
+    <div id="import-in-opts">
+      <div class="divider"></div>
+      <div id="import-in-ss-opts">
+        <div class="row">
+          <div class="fg"><label class="lbl">SS 服务端密码</label><input id="imp-ss-pass" value="r9Y5Kzg/qABrQrV4XGu30cx16hesTVuFEA64HUDuivM="></div>
+          <div class="fg" style="max-width:95px"><label class="lbl">起始端口</label><input id="imp-ss-sport" type="number" value="60089"></div>
+        </div>
+      </div>
+      <div id="import-in-mixed-opts" style="display:none">
+        <div class="row">
+          <div class="fg"><label class="lbl">用户名</label><input id="imp-mx-user" value="unlil.com"></div>
+          <div class="fg"><label class="lbl">密码</label><input id="imp-mx-pass" value="unlil.com"></div>
+          <div class="fg" style="max-width:95px"><label class="lbl">起始端口</label><input id="imp-mx-sport" type="number" value="61080"></div>
+        </div>
+      </div>
+      <div id="import-in-vless-opts" style="display:none">
+        <div class="row">
+          <div class="fg"><label class="lbl">Reality Target</label><input id="imp-vl-target" value="www.microsoft.com:443"></div>
+          <div class="fg" style="max-width:95px"><label class="lbl">起始端口</label><input id="imp-vl-sport" type="number" value="60443"></div>
+        </div>
+        <div class="row">
+          <div class="fg"><label class="lbl">PrivateKey</label><input id="imp-vl-key" value="SKOtsXwcPYhWZhfhdyavzwYYmEHpCoVJr1MZXS5LLGw"></div>
+          <div class="fg" style="max-width:120px"><label class="lbl">ShortId</label><input id="imp-vl-sid" value="9e932d81f26e"></div>
+        </div>
+        <div class="fg"><label class="lbl">ServerName</label><input id="imp-vl-sni" value="www.microsoft.com"></div>
+      </div>
+      <div id="import-in-vlws-opts" style="display:none">
+        <div class="row">
+          <div class="fg"><label class="lbl">CF 域名</label><input id="imp-vlws-host" placeholder="buyvm.unlil.eu.org"></div>
+          <div class="fg" style="max-width:95px"><label class="lbl">起始端口</label><input id="imp-vlws-sport" type="number" value="80"></div>
+        </div>
+        <div class="fg"><label class="lbl">WS 路径</label><input id="imp-vlws-path" value="/download/update.bin"></div>
+      </div>
+    </div>
+    <div id="import-warn" class="warn"></div>
+    <div class="modal-acts"><button class="btn-grey" onclick="closeImport()">取消</button><button class="btn-green" id="importBtn" onclick="doImport()">导入</button></div>
+  </div>
+</div>
+
+<!-- Batch Replace Modal -->
+<div class="modal-bg" id="replaceModal">
+  <div class="modal" style="width:640px">
+    <h3>⇄ 批量替换出站节点</h3>
+    <div class="modal-sub">粘贴新节点，每行一个（host:port:user:pass），然后为每个节点指定替换目标</div>
+
+    <!-- Step 1: paste -->
+    <div id="rp-step1">
+      <div class="fg"><label class="lbl">粘贴新节点列表</label>
+        <textarea id="rpText" rows="6" placeholder="gate.kookeey.info:1000:user1:pass1&#10;gate.kookeey.info:1000:user2:pass2" oninput="parseReplace()"></textarea></div>
+      <div class="row" style="margin-top:6px">
+        <div class="fg"><label class="lbl">节点协议</label>
+          <select id="rpProto"><option value="socks5">SOCKS5</option><option value="http">HTTP(S)</option><option value="ss">Shadowsocks</option></select></div>
+        <div class="fg" id="rp-ss-method" style="display:none"><label class="lbl">SS加密</label>
+          <select id="rpSsMethod"><option value="aes-256-gcm">aes-256-gcm</option><option value="chacha20-ietf-poly1305">chacha20-ietf-poly1305</option><option value="2022-blake3-aes-256-gcm">2022-blake3-aes-256-gcm</option></select></div>
+      </div>
+      <div id="rp-parse-result"></div>
+      <div id="rp-warn" class="warn"></div>
+    </div>
+
+    <!-- Step 2: assign -->
+    <div id="rp-step2" style="display:none">
+      <div style="font-size:10px;color:var(--text3);margin-bottom:8px;line-height:1.7">
+        为每个新节点选择目标出站。<br>
+        快捷模式：<button class="gen-btn" onclick="rpQuickFill('start')" style="margin:0 3px">从头顺序替换</button>
+        从第 <input id="rpFromIdx" type="number" value="1" min="1" style="width:46px;display:inline-block;padding:3px 5px"> 个出站开始
+        <button class="gen-btn" onclick="rpQuickFill('from')" style="margin:0 3px">顺序替换</button>
+        <button class="gen-btn" onclick="rpQuickFill('add')" style="margin:0 3px">全部新增</button>
+        <button class="gen-btn" onclick="rpQuickFill('skip')" style="margin:0 3px">全部跳过</button>
+      </div>
+      <div id="rp-assign-list" style="max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:5px"></div>
+    </div>
+
+    <div class="modal-acts">
+      <button class="btn-grey" onclick="closeReplace()">取消</button>
+      <button class="btn-green" id="rpApplyBtn" style="display:none" onclick="doReplace()">✓ 应用替换</button>
+      <button class="btn-green" id="rpNextBtn" onclick="rpGoStep2()" style="display:none">下一步 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Save Slots Modal -->
+<div class="modal-bg" id="saveSlotsModal">
+  <div class="modal" style="width:520px">
+    <h3>💾 配置存档（最多10套）</h3>
+    <div id="save-slots-list" style="display:flex;flex-direction:column;gap:5px;max-height:340px;overflow-y:auto"></div>
+    <div class="modal-acts">
+      <button class="btn-grey" onclick="document.getElementById('saveSlotsModal').classList.remove('open')">关闭</button>
+      <button class="btn-green" onclick="saveCurrentSlot()">💾 保存当前配置</button>
+    </div>
+  </div>
+</div>
+
+<!-- URI Generator Modal -->
+<div class="modal-bg" id="uriModal">
+  <div class="modal" style="width:640px">
+    <h3>🔗 节点连接 URI 生成</h3>
+    <div class="modal-sub">选择入站节点，填写服务器公网IP，生成可直接导入客户端的连接字符串。</div>
+    <div class="fg"><label class="lbl">服务器公网 IP / 域名</label><input id="uri-server-ip" placeholder="1.2.3.4 或 your.domain.com" oninput="renderUriList()"></div>
+    <div id="uri-list" style="display:flex;flex-direction:column;gap:6px;max-height:380px;overflow-y:auto;margin-top:4px"></div>
+    <div class="modal-acts"><button class="btn-grey" onclick="document.getElementById('uriModal').classList.remove('open')">关闭</button></div>
+  </div>
+</div>
+
+<script>
+function uid(){return '_'+Math.random().toString(36).slice(2,8)}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+// cn/stream are now inside OPTS array, no separate vars needed
+let routeMode='full'; // 'full'=全走落地筛直连 | 'direct'=全走直连筛落地
+let dnsCfgEnabled=false;
+
+function toggleDnsCfg(){
+  dnsCfgEnabled=!dnsCfgEnabled;
+  document.getElementById('tog-dns-cfg').classList.toggle('on',dnsCfgEnabled);
+  document.getElementById('dns-cfg-body').style.display=dnsCfgEnabled?'flex':'none';
+  render();
+}
+
+// ===== 分流预设域名组 =====
+const PRESETS={
+  'TikTok':{desc:'TikTok / ByteDance 全系',domains:[
+    'geosite:tiktok','geosite:bytedance',
+    'domain:tiktok.com','domain:tiktokv.com','domain:tiktokcdn.com',
+    'domain:musical.ly','domain:byteoversea.com','domain:byteimg.com',
+    'domain:ibytedtos.com','domain:ipstatp.com','domain:p16-sign.tiktokcdn.com',
+  ]},
+  'Instagram':{desc:'Instagram / Meta',domains:[
+    'domain:instagram.com','domain:cdninstagram.com','domain:fbcdn.net',
+    'domain:facebook.com','domain:fb.com','domain:meta.com',
+    'domain:threads.net',
+  ]},
+  'Twitter/X':{desc:'Twitter / X',domains:[
+    'domain:twitter.com','domain:x.com','domain:twimg.com',
+    'domain:t.co','domain:abs.twimg.com',
+  ]},
+  'YouTube':{desc:'YouTube / Google Video',domains:[
+    'geosite:youtube',
+    'domain:youtube.com','domain:youtu.be','domain:ytimg.com',
+    'domain:googlevideo.com','domain:ggpht.com',
+  ]},
+  'Netflix':{desc:'Netflix 流媒体',domains:[
+    'geosite:netflix',
+    'domain:netflix.com','domain:nflxvideo.net','domain:nflximg.net',
+    'domain:nflxext.com','domain:fast.com',
+  ]},
+  'Disney+':{desc:'Disney+ / Hulu / ESPN',domains:[
+    'domain:disneyplus.com','domain:disney-plus.net','domain:dssott.com',
+    'domain:hulu.com','domain:hulustream.com','domain:espn.com',
+    'domain:disneystreaming.com',
+  ]},
+  'Spotify':{desc:'Spotify 音乐',domains:[
+    'domain:spotify.com','domain:scdn.co','domain:spotifycdn.com',
+    'domain:audio-sp-tok.com','domain:spotifycdn.net',
+  ]},
+  'OpenAI':{desc:'OpenAI / ChatGPT / Claude / Gemini',domains:[
+    'geosite:category-ai-chat-!cn',
+    'domain:openai.com','domain:chatgpt.com','domain:oaistatic.com',
+    'domain:oaiusercontent.com','domain:claude.ai','domain:anthropic.com',
+    'domain:gemini.google.com','domain:bard.google.com',
+  ]},
+  'Google':{desc:'Google 全系服务',domains:[
+    'geosite:google',
+    'domain:google.com','domain:googleapis.com','domain:gstatic.com',
+    'domain:googleusercontent.com','domain:googlesyndication.com',
+    'domain:gmail.com','domain:drive.google.com',
+  ]},
+  'Telegram':{desc:'Telegram 即时通讯',domains:[
+    'domain:telegram.org','domain:t.me','domain:telegram.me',
+    'domain:telegra.ph','ip:149.154.160.0/20','ip:91.108.4.0/22',
+    'ip:91.108.8.0/22','ip:91.108.56.0/22','ip:185.76.151.0/24',
+  ]},
+  'Amazon':{desc:'Amazon / AWS 电商与云服务',domains:[
+    'domain:amazon.com','domain:amazonaws.com','domain:amazon.co.jp',
+    'domain:amazon.co.uk','domain:amazon.de','domain:amazon.fr',
+    'domain:awsstatic.com','domain:media-amazon.com',
+  ]},
+  'PayPal':{desc:'PayPal 支付',domains:[
+    'domain:paypal.com','domain:paypalobjects.com','domain:paypal.me',
+  ]},
+  'Stripe':{desc:'Stripe 支付',domains:[
+    'domain:stripe.com','domain:stripe.network','domain:stripecdn.com',
+  ]},
+  '美区IP':{desc:'美国 IP 段（geoip:us）',domains:['geoip:us']},
+  '日区IP':{desc:'日本 IP 段（geoip:jp）',domains:['geoip:jp']},
+  '港区IP':{desc:'香港 IP 段（geoip:hk）',domains:['geoip:hk']},
+  '韩区IP':{desc:'韩国 IP 段（geoip:kr）',domains:['geoip:kr']},
+  '台区IP':{desc:'台湾 IP 段（geoip:tw）',domains:['geoip:tw']},
+  '新加坡IP':{desc:'新加坡 IP 段（geoip:sg）',domains:['geoip:sg']},
+  'Cloudflare':{desc:'Cloudflare CDN IP',domains:[
+    'ip:103.21.244.0/22','ip:103.22.200.0/22','ip:103.31.4.0/22',
+    'ip:104.16.0.0/13','ip:104.24.0.0/14','ip:108.162.192.0/18',
+    'ip:131.0.72.0/22','ip:141.101.64.0/18','ip:162.158.0.0/15',
+    'ip:172.64.0.0/13','ip:173.245.48.0/20','ip:188.114.96.0/20',
+    'ip:190.93.240.0/20','ip:197.234.240.0/22','ip:198.41.128.0/17',
+  ]},
+};
+
+function addPreset(obId, key){
+  const ob=outbounds.find(o=>o.id===obId);
+  if(!ob||!PRESETS[key])return;
+  const existing=(ob.routeDomains||'').trim();
+  const newDomains=PRESETS[key].domains;
+  const existingSet=new Set(existing.split('\n').map(l=>l.trim()).filter(l=>l));
+  const toAdd=newDomains.filter(d=>!existingSet.has(d));
+  if(!toAdd.length)return;
+  ob.routeDomains=(existing?existing+'\n':'')+toAdd.join('\n');
+  renderAll();
+}
+function clearPreset(obId){
+  const ob=outbounds.find(o=>o.id===obId);
+  if(!ob)return;
+  ob.routeDomains='';
+  renderAll();
+}
+function toggleRouteInbound(obId, ibId, checked){
+  const ob=outbounds.find(o=>o.id===obId);
+  if(!ob)return;
+  if(!ob.routeInbounds)ob.routeInbounds=[];
+  if(checked){if(!ob.routeInbounds.includes(ibId))ob.routeInbounds.push(ibId);}
+  else{ob.routeInbounds=ob.routeInbounds.filter(id=>id!==ibId);}
+  render();
+}
+
+const OPTS=[
+  // 组 1：安全防护
+  {key:'dns',   name:'DNS 53端口劫持',     sub:'防DNS明文泄漏',              grp:'🛡 安全防护'},
+  {key:'bt',    name:'屏蔽 BT/PT 流量',    sub:'防滥用导致机器被封'},
+  {key:'priv',  name:'屏蔽私有IP/私有域名', sub:'防SSRF攻击本机内网'},
+  // 组 2：内容屏蔽
+  {key:'ads',   name:'广告追踪',           sub:'geosite:category-ads-all',  grp:'🚫 内容屏蔽'},
+  {key:'ipc',   name:'IP纯净度检测站',     sub:'ping0 / ipinfo / scamalytics 等'},
+  {key:'spd',   name:'测速网站',           sub:'geosite:category-speedtest'},
+  {key:'gam',   name:'博彩网站',           sub:'bet365 / sbobet / stake 等'},
+  {key:'porn',  name:'成人内容',           sub:'geosite:category-porn'},
+  {key:'tik',   name:'TikTok / ByteDance', sub:'geosite:tiktok + bytedance'},
+  {key:'ai',    name:'AI 海外服务',        sub:'geosite:category-ai-chat-!cn'},
+  {key:'crypto',name:'加密货币',           sub:'geosite:category-cryptocurrency'},
+  {key:'cn',    name:'中国大陆 IP / 域名', sub:'geoip:cn + geosite:cn'},
+  // 组 3：直连放行
+  {key:'stream',name:'流媒体直连',         sub:'Netflix / YouTube / Disney → DIRECT', grp:'✅ 直连放行', direct:true},
+];
+let opts={};
+OPTS.forEach(o=>opts[o.key]=true);
+opts.stream=false; // 流媒体默认关
+
+let inbounds=[];
+let outbounds=[];
+function autoRef(){inbounds.forEach((ib,i)=>{if(!ib.outRef||!outbounds.find(o=>o.tag===ib.outRef))ib.outRef=outbounds[i%Math.max(outbounds.length,1)]?.tag||''});}
+autoRef();
+
+// ===== RENDER OPTS =====
+function renderOpts(){
+  let html='';
+  let lastGrp='';
+  OPTS.forEach(o=>{
+    if(o.grp&&o.grp!==lastGrp){
+      lastGrp=o.grp;
+      html+=`<div style="padding:6px 13px 3px;font-size:9px;font-weight:700;letter-spacing:2px;color:var(--text3);text-transform:uppercase;border-top:1px solid var(--border);margin-top:2px">${o.grp}</div>`;
+    }
+    const isOn=opts[o.key];
+    const isDirect=o.direct;
+    const color=isDirect?'var(--green)':'var(--red)';
+    const statusTxt=isDirect?(isOn?'DIRECT':'OFF'):(isOn?'BLOCK':'OFF');
+    html+=`<div class="opt-row">
+      <div><div class="opt-name">${o.name}</div><div class="opt-sub">${o.sub}</div></div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:9px;font-weight:700;letter-spacing:1px;color:${isOn?color:'var(--text3)'};min-width:34px;text-align:right">${statusTxt}</span>
+        <button class="toggle ${isOn?'on':''}" data-opt="${o.key}" style="${isOn&&isDirect?'background:var(--green)':''}"></button>
+      </div>
+    </div>`;
+  });
+  // Custom rules at bottom of opts
+  html+=`<div style="padding:6px 13px 3px;font-size:9px;font-weight:700;letter-spacing:2px;color:var(--text3);text-transform:uppercase;border-top:1px solid var(--border);margin-top:2px">✏ 自定义规则</div>
+  <div style="padding:6px 10px;display:flex;flex-direction:column;gap:6px">
+    <div class="fg"><label class="lbl" style="color:var(--red)">🚫 自定义屏蔽（每行一个域名）</label>
+      <textarea id="custom-block" rows="2" placeholder="domain:example.com&#10;keyword:ads" oninput="render()" style="font-size:10px"></textarea></div>
+    <div class="fg"><label class="lbl" style="color:var(--green)">✅ 自定义直连（每行一个域名）</label>
+      <textarea id="custom-direct" rows="2" placeholder="domain:mysite.com" oninput="render()" style="font-size:10px"></textarea></div>
+  </div>`;
+  document.getElementById('opts-area').innerHTML=html;
+}
+
+// ===== RENDER INBOUNDS =====
+const SS_METHODS=['2022-blake3-aes-256-gcm','2022-blake3-chacha20-poly1305','aes-256-gcm','aes-128-gcm','chacha20-ietf-poly1305'];
+
+function renderInbounds(){
+  document.getElementById('inbounds-list').innerHTML=inbounds.map((ib,i)=>{
+    const bc={ss:'pb-ss',vless:'pb-vless',mixed:'pb-mixed','vless-ws':'pb-vless-ws'}[ib.type]||'pb-ss';
+    const bl={ss:'SS2022',vless:'VLESS',mixed:'MIXED','vless-ws':'VLESS-WS/CF',trojan:'Trojan'}[ib.type]||'MIXED';
+    const TYPE_LABELS={mixed:'MIXED',ss:'SS2022',vless:'VLESS+Reality','vless-ws':'VLESS+WS(CF)',trojan:'Trojan'};
+    const tbs=['mixed','ss','vless','vless-ws','trojan'].map(t=>`<button class="tb ${ib.type===t?'a-'+(t==='vless-ws'||t==='trojan'?'direct':t):''}" style="${ib.type===t&&t==='vless-ws'?'background:rgba(255,209,102,.15);color:var(--yellow);border-color:rgba(255,209,102,.4)':ib.type===t&&t==='trojan'?'background:rgba(255,79,106,.15);color:var(--red);border-color:rgba(255,79,106,.4)':''}" data-act="ib-type" data-id="${ib.id}" data-val="${t}">${TYPE_LABELS[t]}</button>`).join('');
+    // 出口绑定选项：自定义出站 + 内置系统出站
+    const sysOpts=`<option value="DIRECT" ${ib.outRef==='DIRECT'?'selected':''}>── DIRECT（直连）</option><option value="BLOCK" ${ib.outRef==='BLOCK'?'selected':''}>── BLOCK（屏蔽）</option>`;
+    const outOpts=outbounds.map(o=>`<option value="${esc(o.tag)}" ${o.tag===ib.outRef?'selected':''}>${esc(o.tag)}</option>`).join('')+sysOpts;
+    let body=`<div class="type-btns">${tbs}</div>
+      <div class="row">
+        <div class="fg"><label class="lbl">Tag</label><input value="${esc(ib.tag)}" data-ib="${ib.id}" data-f="tag"></div>
+        <div class="fg" style="max-width:86px"><label class="lbl">端口</label><input type="number" value="${ib.port}" data-ib="${ib.id}" data-f="port"></div>
+      </div>`;
+    if(ib.type==='ss')body+=`
+      <div class="fg"><label class="lbl">加密方式</label><select data-ib="${ib.id}" data-f="ssMethod">${SS_METHODS.map(m=>`<option value="${m}" ${m===ib.ssMethod?'selected':''}>${m}</option>`).join('')}</select></div>
+      <div class="fg"><label class="lbl">服务端密码（SS2022）</label>
+        <div class="input-wrap">
+          <input value="${esc(ib.ssPass)}" data-ib="${ib.id}" data-f="ssPass" id="inp-ssp-${ib.id}">
+          <button class="gen-btn" data-act="gen-ssp" data-id="${ib.id}" title="随机生成32字节密码">↻ 随机</button>
+        </div></div>`;
+    else if(ib.type==='vless')body+=`
+      <div class="fg"><label class="lbl">Reality Target</label><input value="${esc(ib.rTarget)}" data-ib="${ib.id}" data-f="rTarget"></div>
+      <div class="fg"><label class="lbl">PrivateKey</label>
+        <div class="input-wrap">
+          <input value="${esc(ib.rKey)}" data-ib="${ib.id}" data-f="rKey" id="inp-rk-${ib.id}">
+          <button class="gen-btn" data-act="gen-kp" data-id="${ib.id}" title="浏览器生成X25519密钥对">↻ 生成密钥对</button>
+        </div></div>
+      <div class="row">
+        <div class="fg"><label class="lbl">ShortId</label>
+          <div class="input-wrap">
+            <input value="${esc(ib.rSid)}" data-ib="${ib.id}" data-f="rSid" id="inp-sid-${ib.id}">
+            <button class="gen-btn" data-act="gen-sid" data-id="${ib.id}" title="随机生成ShortId">↻</button>
+          </div></div>
+        <div class="fg"><label class="lbl">ServerName</label><input value="${esc(ib.rSni)}" data-ib="${ib.id}" data-f="rSni"></div>
+      </div>
+      <div id="kp-box-${ib.id}"></div>`;
+    else if(ib.type==='vless-ws')body+=`
+      <div style="font-size:10px;color:var(--yellow);padding:2px 0;line-height:1.6">CF反代模式：Xray这边 security=none，TLS由CF负责<br>HTTP端口：80 / 8080 / 2052 / 2086 &nbsp;|&nbsp; TLS端口：443 / 8443 / 2053 / 2096</div>
+      <div class="fg"><label class="lbl">CF 域名（Host Header / SNI）</label><input value="${esc(ib.cfHost)}" placeholder="buyvm.unlil.eu.org" data-ib="${ib.id}" data-f="cfHost"></div>
+      <div class="fg"><label class="lbl">WS 路径</label><input value="${esc(ib.wsPath||'/download/update.bin')}" data-ib="${ib.id}" data-f="wsPath"></div>`;
+    else if(ib.type==='trojan')body+=`
+      <div style="font-size:10px;color:var(--red);padding:2px 0">Trojan 入站，需要 TLS 证书，适合有域名的服务器</div>
+      <div class="fg"><label class="lbl">Trojan 密码</label>
+        <div class="input-wrap"><input value="${esc(ib.trojanPass||'')}" data-ib="${ib.id}" data-f="trojanPass" id="inp-tp-${ib.id}" placeholder="随机强密码">
+        <button class="gen-btn" data-act="gen-trojan" data-id="${ib.id}" title="随机生成Trojan密码">↻ 随机</button></div></div>
+      <div class="fg"><label class="lbl">TLS 证书路径</label><input value="${esc(ib.tlsCert||'')}" placeholder="/etc/ssl/cert.pem" data-ib="${ib.id}" data-f="tlsCert"></div>
+      <div class="fg"><label class="lbl">TLS 私钥路径</label><input value="${esc(ib.tlsKey||'')}" placeholder="/etc/ssl/key.pem" data-ib="${ib.id}" data-f="tlsKey"></div>`;
+    else body+=`
+      <div class="fg"><label class="lbl">监听地址</label><select data-ib="${ib.id}" data-f="mxListen">
+        <option value="0.0.0.0" ${ib.mxListen==='0.0.0.0'?'selected':''}>0.0.0.0（公网）</option>
+        <option value="127.0.0.1" ${ib.mxListen==='127.0.0.1'?'selected':''}>127.0.0.1（本地）</option></select></div>
+      <div class="row"><div class="fg"><label class="lbl">用户名</label><input value="${esc(ib.mxUser)}" data-ib="${ib.id}" data-f="mxUser"></div>
+        <div class="fg"><label class="lbl">密码</label><input value="${esc(ib.mxPass)}" data-ib="${ib.id}" data-f="mxPass"></div></div>`;
+    body+=`<div class="fg"><label class="lbl">→ 出口绑定</label><select data-ib="${ib.id}" data-f="outRef">${outOpts}</select></div>`;
+    return `<div class="card"><div class="card-head"><span class="card-num">#${String(i+1).padStart(2,'0')}</span><span class="pbadge ${bc}">${bl}</span><span class="card-tag" id="ibtag-${ib.id}">${esc(ib.tag)}</span><span class="card-port" id="ibport-${ib.id}">:${ib.port}</span><button class="btn-x" data-act="rm-ib" data-id="${ib.id}">✕</button></div><div class="card-body">${body}</div></div>`;
+  }).join('')+`<button class="btn-add" onclick="addInbound()">＋ 添加入站</button>`;
+}
+
+// ===== RENDER OUTBOUNDS =====
+function renderOutbounds(){
+  const OB_METHODS=['aes-256-gcm','aes-128-gcm','chacha20-ietf-poly1305','2022-blake3-aes-256-gcm','2022-blake3-chacha20-poly1305'];
+  document.getElementById('outbounds-list').innerHTML=outbounds.map((ob,i)=>{
+    const bc={ss:'pb-ss',socks5:'pb-socks5',http:'pb-mixed',direct:'pb-direct'}[ob.type]||'pb-socks5';
+    const bl={ss:'SS落地',socks5:'SOCKS5落地',http:'HTTP(S)落地',direct:'DIRECT'}[ob.type]||'SOCKS5落地';
+    const tbs=['socks5','http','ss','direct'].map(t=>{
+      const label={socks5:'SOCKS5 落地',http:'HTTP(S) 落地',ss:'SS 落地',direct:'DIRECT'}[t];
+      return `<button class="tb ${ob.type===t?'a-'+t:''}" style="${ob.type===t&&t==='http'?'background:rgba(34,217,122,.15);color:var(--green);border-color:rgba(34,217,122,.4)':''}" data-act="ob-type" data-id="${ob.id}" data-val="${t}">${label}</button>`;
+    }).join('');
+    let body=`<div class="type-btns">${tbs}</div>
+      <div class="fg"><label class="lbl">Tag 标识</label><input value="${esc(ob.tag)}" data-ob="${ob.id}" data-f="tag"></div>`;
+    if(ob.type==='ss')body+=`
+      <div class="row"><div class="fg"><label class="lbl">落地地址</label><input value="${esc(ob.address)}" placeholder="x.x.x.x" data-ob="${ob.id}" data-f="address"></div>
+        <div class="fg" style="max-width:86px"><label class="lbl">端口</label><input type="number" value="${ob.port}" data-ob="${ob.id}" data-f="port"></div></div>
+      <div class="fg"><label class="lbl">加密方式</label><select data-ob="${ob.id}" data-f="method">${OB_METHODS.map(m=>`<option value="${m}" ${m===ob.method?'selected':''}>${m}</option>`).join('')}</select></div>
+      <div class="row">
+        <div class="fg"><label class="lbl">SS 密码</label><input value="${esc(ob.password)}" data-ob="${ob.id}" data-f="password"></div>
+        <div class="fg" style="max-width:140px"><label class="lbl">Email（转发用户标识）</label><input value="${esc(ob.email||'bridge-user')}" placeholder="bridge-user" data-ob="${ob.id}" data-f="email"></div>
+      </div>`;
+    else if(ob.type==='socks5')body+=`
+      <div style="font-size:10px;color:var(--text3);padding:2px 0">Xray config 中生成 protocol: socks，作为落地出口使用</div>
+      <div class="row"><div class="fg"><label class="lbl">落地地址</label><input value="${esc(ob.address)}" placeholder="x.x.x.x" data-ob="${ob.id}" data-f="address"></div>
+        <div class="fg" style="max-width:86px"><label class="lbl">端口</label><input type="number" value="${ob.port}" data-ob="${ob.id}" data-f="port"></div></div>
+      <div class="row"><div class="fg"><label class="lbl">用户名（可选）</label><input value="${esc(ob.socksUser)}" data-ob="${ob.id}" data-f="socksUser"></div>
+        <div class="fg"><label class="lbl">密码（可选）</label><input value="${esc(ob.socksPass)}" data-ob="${ob.id}" data-f="socksPass"></div></div>`;
+    else if(ob.type==='http')body+=`
+      <div style="font-size:10px;color:var(--text3);padding:2px 0">HTTP/HTTPS 代理落地，Xray 生成 protocol: http。HTTPS 需勾选 TLS。</div>
+      <div class="row"><div class="fg"><label class="lbl">落地地址</label><input value="${esc(ob.address)}" placeholder="x.x.x.x" data-ob="${ob.id}" data-f="address"></div>
+        <div class="fg" style="max-width:86px"><label class="lbl">端口</label><input type="number" value="${ob.port}" data-ob="${ob.id}" data-f="port"></div>
+        <div class="fg" style="max-width:72px"><label class="lbl">TLS(HTTPS)</label>
+          <select data-ob="${ob.id}" data-f="httpTls"><option value="false" ${ob.httpTls!=='true'?'selected':''}>否</option><option value="true" ${ob.httpTls==='true'?'selected':''}>是</option></select></div>
+      </div>
+      <div class="row"><div class="fg"><label class="lbl">用户名（可选）</label><input value="${esc(ob.socksUser)}" data-ob="${ob.id}" data-f="socksUser"></div>
+        <div class="fg"><label class="lbl">密码（可选）</label><input value="${esc(ob.socksPass)}" data-ob="${ob.id}" data-f="socksPass"></div></div>`;
+    else body+=`<div style="color:var(--text3);font-size:10px;padding:3px 0">直连出站，无需参数</div>`;
+    if(ob.type!=='direct'&&routeMode==='direct'){
+      const rdLabel=routeMode==='direct'
+        ?'<span style="color:var(--yellow)">直连优先模式</span>：以下域名/IP走此出站落地（每行一个）'
+        :'<span style="color:var(--text3)">直连优先模式下的分流域名</span>（切换模式后生效）';
+      const presetBtns=Object.keys(PRESETS).map(k=>`<button class="gen-btn" style="font-size:9px;padding:2px 6px" onclick="addPreset('${ob.id}','${k}')" title="${PRESETS[k].desc}">${k}</button>`).join('');
+      // 限定入站多选
+      const ibCheckboxes=inbounds.map(ib=>{
+        const checked=(ob.routeInbounds||[]).includes(ib.id);
+        return `<label style="display:flex;align-items:center;gap:3px;font-size:10px;color:${checked?'var(--green)':'var(--text3)'};cursor:pointer;white-space:nowrap">
+          <input type="checkbox" ${checked?'checked':''} style="width:auto;accent-color:var(--green)" onchange="toggleRouteInbound('${ob.id}','${ib.id}',this.checked)">
+          ${esc(ib.tag)}</label>`;
+      }).join('');
+      body+=`<div class="fg" style="margin-top:4px;border-top:1px solid var(--border);padding-top:6px">
+        <label class="lbl">${rdLabel}</label>
+        <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:4px">${presetBtns}</div>
+        <textarea rows="4" placeholder="geosite:tiktok&#10;geosite:bytedance&#10;domain:instagram.com&#10;geoip:us" data-ob="${ob.id}" data-f="routeDomains" style="font-size:10px;${routeMode==='direct'?'border-color:rgba(255,209,102,.4)':''}">${esc(ob.routeDomains||'')}</textarea>
+        <div style="display:flex;gap:4px;margin-top:3px;align-items:center">
+          <button class="gen-btn" style="font-size:9px;color:var(--red);flex-shrink:0" onclick="clearPreset('${ob.id}')">🗑 清空</button>
+          <span style="font-size:9px;color:var(--text3)">点预设标签追加</span>
+        </div>
+        ${inbounds.length?`<div style="margin-top:6px;border-top:1px solid var(--border);padding-top:5px">
+          <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:${(ob.routeInbounds||[]).length?'var(--green)':'var(--text3)'};margin-bottom:4px">
+            限定入站（不选=全局；选中=只有勾选的入站才走此出站）
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px">${ibCheckboxes}</div>
+        </div>`:''}
+      </div>`;
+    }
+    const isSelected=obSelected.has(ob.id);
+    return `<div class="card" style="${isSelected?'border-color:var(--accent2);background:rgba(124,92,255,.05)':''}"><div class="card-head"><span class="card-num">#${String(i+1).padStart(2,'0')}</span><input type="checkbox" class="ob-select" data-ob-id="${ob.id}" ${isSelected?'checked':''} style="width:auto;accent-color:var(--accent2);cursor:pointer" title="Shift+点击多选"><span class="pbadge ${bc}">${bl}</span><span class="card-tag" id="obtag-${ob.id}">${esc(ob.tag)}</span><button class="btn-x" data-act="rm-ob" data-id="${ob.id}">✕</button></div><div class="card-body">${body}</div></div>`;
+  }).join('')+`<button class="btn-add" onclick="addOutbound()">＋ 添加出站</button>`;
+}
+
+// ===== RENDER ROUTING =====
+function renderRouting(){
+  document.getElementById('routing-table').innerHTML=inbounds.map(ib=>{
+    const opts2=outbounds.map(o=>`<option value="${esc(o.tag)}" ${o.tag===ib.outRef?'selected':''}>${esc(o.tag)}</option>`).join('')+`<option value="DIRECT" ${ib.outRef==='DIRECT'?'selected':''}>── DIRECT（直连）</option><option value="BLOCK" ${ib.outRef==='BLOCK'?'selected':''}>── BLOCK（屏蔽）</option>`;
+    return `<div class="route-row"><span class="rr-in">${esc(ib.tag)}</span><span class="rr-arr">→</span><select class="rr-sel" data-ib="${ib.id}" data-f="outRef">${opts2}</select></div>`;
+  }).join('')||'<div style="padding:8px 10px;color:var(--text3);font-size:11px">暂无入站</div>';
+}
+
+function renderAll(){renderOpts();renderInbounds();renderOutbounds();renderRouting();render();}
+
+// ===== EVENT DELEGATION =====
+document.addEventListener('click',e=>{
+  const t=e.target;
+  // outbound checkbox select (supports shift+click range)
+  const obSel=t.closest('.ob-select');
+  if(obSel){
+    const id=obSel.dataset.obId;
+    if(e.shiftKey&&obLastClickedId){
+      const idxA=outbounds.findIndex(o=>o.id===obLastClickedId);
+      const idxB=outbounds.findIndex(o=>o.id===id);
+      if(idxA>=0&&idxB>=0){
+        const [lo,hi]=[Math.min(idxA,idxB),Math.max(idxA,idxB)];
+        for(let i=lo;i<=hi;i++)obSelected.add(outbounds[i].id);
+      }
+    } else {
+      if(obSelected.has(id))obSelected.delete(id);else obSelected.add(id);
+    }
+    obLastClickedId=id;
+    renderBulkBar();
+    renderOutbounds();
+    return;
+  }
+  // toggle opts
+  const tog=t.closest('.toggle[data-opt]');
+  if(tog){opts[tog.dataset.opt]=!opts[tog.dataset.opt];tog.classList.toggle('on',opts[tog.dataset.opt]);render();return;}
+  // ib type btn
+  const ibt=t.closest('[data-act="ib-type"]');
+  if(ibt){const ib=inbounds.find(x=>x.id===ibt.dataset.id);if(ib){ib.type=ibt.dataset.val;renderAll();}return;}
+  // ob type btn
+  const obt=t.closest('[data-act="ob-type"]');
+  if(obt){const ob=outbounds.find(x=>x.id===obt.dataset.id);if(ob){ob.type=obt.dataset.val;renderAll();}return;}
+  // rm ib
+  const ri=t.closest('[data-act="rm-ib"]');
+  if(ri){inbounds=inbounds.filter(x=>x.id!==ri.dataset.id);renderAll();return;}
+  // rm ob
+  const ro=t.closest('[data-act="rm-ob"]');
+  if(ro){outbounds=outbounds.filter(x=>x.id!==ro.dataset.id);renderAll();return;}
+  // gen ss password
+  const gsp=t.closest('[data-act="gen-ssp"]');
+  if(gsp){
+    const ib=inbounds.find(x=>x.id===gsp.dataset.id);
+    if(ib){ib.ssPass=genSSPass();const el=document.getElementById('inp-ssp-'+ib.id);if(el)el.value=ib.ssPass;render();}
+    gsp.classList.add('spin');setTimeout(()=>gsp.classList.remove('spin'),400);return;}
+  // gen shortid
+  const gsi=t.closest('[data-act="gen-sid"]');
+  if(gsi){
+    const ib=inbounds.find(x=>x.id===gsi.dataset.id);
+    if(ib){ib.rSid=genShortId();const el=document.getElementById('inp-sid-'+ib.id);if(el)el.value=ib.rSid;render();}
+    gsi.classList.add('spin');setTimeout(()=>gsi.classList.remove('spin'),400);return;}
+  // gen trojan password
+  const gtp=t.closest('[data-act="gen-trojan"]');
+  if(gtp){
+    const ib=inbounds.find(x=>x.id===gtp.dataset.id);
+    if(ib){ib.trojanPass=genSSPass();const el=document.getElementById('inp-tp-'+ib.id);if(el)el.value=ib.trojanPass;render();}
+    gtp.classList.add('spin');setTimeout(()=>gtp.classList.remove('spin'),400);return;}
+  // gen x25519 keypair
+  const gkp=t.closest('[data-act="gen-kp"]');
+  if(gkp){
+    gkp.textContent='↻ 生成中...';gkp.disabled=true;
+    genX25519().then(kp=>{
+      const ib=inbounds.find(x=>x.id===gkp.dataset.id);
+      if(ib){
+        ib.rKey=kp.privateKey;
+        const el=document.getElementById('inp-rk-'+ib.id);if(el)el.value=ib.rKey;
+        const box=document.getElementById('kp-box-'+ib.id);
+        if(box)box.innerHTML=`<div class="keypair-box"><div class="kp-label">PublicKey（给客户端用）</div><div class="kp-val">${kp.publicKey}</div></div>`;
+        render();
+      }
+      gkp.textContent='↻ 生成密钥对';gkp.disabled=false;
+    }).catch(()=>{gkp.textContent='↻ 生成密钥对';gkp.disabled=false;});return;}
+});
+
+document.addEventListener('input',e=>{
+  const el=e.target;
+  if(el.dataset.ib){
+    const ib=inbounds.find(x=>x.id===el.dataset.ib);
+    if(!ib)return;
+    ib[el.dataset.f]=el.type==='number'?+el.value:el.value;
+    if(el.dataset.f==='tag'){const ct=document.getElementById('ibtag-'+ib.id);if(ct)ct.textContent=el.value;
+      // 实时检查是否与其他 Tag 冲突，冲突红框提示
+      const conflict=[...inbounds,...outbounds].some(x=>x.id!==ib.id&&x.tag===el.value);
+      el.style.borderColor=conflict?'var(--red)':'';
+      el.style.background=conflict?'rgba(255,79,106,.08)':'';
+      el.title=conflict?'Tag 冲突！失焦时会自动加序号去重':'';
+    }
+    if(el.dataset.f==='port'){const cp=document.getElementById('ibport-'+ib.id);if(cp)cp.textContent=':'+el.value;}
+    renderRouting();render();return;
+  }
+  if(el.dataset.ob){
+    const ob=outbounds.find(x=>x.id===el.dataset.ob);
+    if(!ob)return;
+    ob[el.dataset.f]=el.type==='number'?+el.value:el.value;
+    if(el.dataset.f==='tag'){const ct=document.getElementById('obtag-'+ob.id);if(ct)ct.textContent=el.value;
+      const conflict=[...inbounds,...outbounds].some(x=>x.id!==ob.id&&x.tag===el.value);
+      el.style.borderColor=conflict?'var(--red)':'';
+      el.style.background=conflict?'rgba(255,79,106,.08)':'';
+      el.title=conflict?'Tag 冲突！失焦时会自动加序号去重':'';
+    }
+    renderInbounds();renderRouting();render();return;
+  }
+});
+
+// blur 时自动去重 Tag
+document.addEventListener('blur',e=>{
+  const el=e.target;
+  if(el.dataset.f!=='tag')return;
+  if(el.dataset.ib){
+    const ib=inbounds.find(x=>x.id===el.dataset.ib);
+    if(!ib||!ib.tag)return;
+    const newTag=uniqueTagGlobal(ib.tag,ib.id);
+    if(newTag!==ib.tag){
+      ib.tag=newTag;
+      el.value=newTag;
+      el.style.borderColor='';el.style.background='';el.title='';
+      renderAll();
+    }
+  } else if(el.dataset.ob){
+    const ob=outbounds.find(x=>x.id===el.dataset.ob);
+    if(!ob||!ob.tag)return;
+    const newTag=uniqueTagGlobal(ob.tag,ob.id);
+    if(newTag!==ob.tag){
+      // 关键：如果这个出站被某些入站引用，更新引用
+      const oldTag=ob.tag;
+      inbounds.forEach(ib=>{if(ib.outRef===oldTag)ib.outRef=newTag;});
+      ob.tag=newTag;
+      el.value=newTag;
+      el.style.borderColor='';el.style.background='';el.title='';
+      renderAll();
+    }
+  }
+},true);
+
+document.addEventListener('change',e=>{
+  const el=e.target;
+  if(el.dataset.ib){
+    const ib=inbounds.find(x=>x.id===el.dataset.ib);
+    if(!ib)return;
+    ib[el.dataset.f]=el.type==='number'?+el.value:el.value;
+    renderRouting();render();return;
+  }
+  if(el.dataset.ob){
+    const ob=outbounds.find(x=>x.id===el.dataset.ob);
+    if(!ob)return;
+    ob[el.dataset.f]=el.type==='number'?+el.value:el.value;
+    renderInbounds();renderRouting();render();return;
+  }
+});
+
+function setRouteMode(mode){
+  routeMode=mode;
+  const btnFull=document.getElementById('mode-btn-full');
+  const btnDirect=document.getElementById('mode-btn-direct');
+  const desc=document.getElementById('route-mode-desc');
+  if(mode==='full'){
+    btnFull.style.background='var(--accent)';btnFull.style.color='white';
+    btnDirect.style.background='var(--bg3)';btnDirect.style.color='var(--text3)';
+    if(desc)desc.textContent='全走落地，按规则筛选直连';
+  } else {
+    btnDirect.style.background='var(--green)';btnDirect.style.color='var(--bg)';
+    btnFull.style.background='var(--bg3)';btnFull.style.color='var(--text3)';
+    if(desc)desc.textContent='全走直连，按域名分流到落地';
+  }
+  renderAll();
+}
+
+// ===== GEN FUNCTIONS =====
+function genSSPass(){
+  const b=new Uint8Array(32);crypto.getRandomValues(b);
+  return btoa(String.fromCharCode(...b));
+}
+function genShortId(){
+  const b=new Uint8Array(8);crypto.getRandomValues(b);
+  return Array.from(b).map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+function genUUID(){
+  return crypto.randomUUID?crypto.randomUUID():'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c==='x'?r:(r&0x3|0x8)).toString(16)});
+}
+async function genX25519(){
+  try{
+    const kp=await crypto.subtle.generateKey({name:'X25519'},true,['deriveKey','deriveBits']);
+    const pkcs8=await crypto.subtle.exportKey('pkcs8',kp.privateKey);
+    const privBytes=new Uint8Array(pkcs8).slice(16);
+    const pubRaw=await crypto.subtle.exportKey('raw',kp.publicKey);
+    const pubBytes=new Uint8Array(pubRaw);
+    const toB64=arr=>btoa(String.fromCharCode(...arr));
+    return{privateKey:toB64(privBytes),publicKey:toB64(pubBytes)};
+  }catch(e){
+    // Fallback for browsers without X25519 support
+    const priv=new Uint8Array(32);crypto.getRandomValues(priv);
+    return{privateKey:btoa(String.fromCharCode(...priv)),publicKey:'⚠ 浏览器不支持X25519，请在服务器运行: xray x25519'};
+  }
+}
+
+// ===== ADD =====
+// 出站多选状态
+let obSelected=new Set();
+let obLastClickedId=null;
+
+// 生成不重复的 Tag，已存在则自动加序号
+function uniqueTag(base, list){
+  const taken=new Set(list.map(x=>x.tag));
+  if(!taken.has(base))return base;
+  let n=2;
+  while(taken.has(`${base}_${String(n).padStart(2,'0')}`))n++;
+  return `${base}_${String(n).padStart(2,'0')}`;
+}
+// 全局不重复Tag（跨inbounds+outbounds，包括自身外其他所有）
+function uniqueTagGlobal(base, excludeId=null){
+  const taken=new Set([
+    ...inbounds.filter(x=>x.id!==excludeId).map(x=>x.tag),
+    ...outbounds.filter(x=>x.id!==excludeId).map(x=>x.tag),
+  ]);
+  if(!taken.has(base))return base;
+  let n=2;
+  while(taken.has(`${base}_${String(n).padStart(2,'0')}`))n++;
+  return `${base}_${String(n).padStart(2,'0')}`;
+}
+
+function addInbound(){
+  const maxP=Math.max(...inbounds.map(i=>i.port),61079)+1;
+  const tag=uniqueTagGlobal(`MIXED-IN_${String(inbounds.length+1).padStart(2,'0')}`);
+  inbounds.push({id:uid(),type:'mixed',tag,port:maxP,ssMethod:'2022-blake3-aes-256-gcm',ssPass:genSSPass(),mxUser:'',mxPass:'',mxListen:'0.0.0.0',rTarget:'www.microsoft.com:443',rKey:'',rSid:genShortId(),rSni:'www.microsoft.com',wsPath:'/download/update.bin',cfHost:'',outRef:outbounds[0]?.tag||''});
+  renderAll();
+}
+function addOutbound(){
+  const tag=uniqueTagGlobal(`OUT_NEW_${String(outbounds.length+1).padStart(2,'0')}`);
+  outbounds.push({id:uid(),type:'socks5',tag,address:'',port:1080,method:'aes-256-gcm',password:'',email:'bridge-user',socksUser:'',socksPass:'',httpTls:'false',routeDomains:'',routeInbounds:[]});
+  renderAll();
+}
+
+// ===== BATCH IMPORT =====
+let parsedNodes=[];
+function openImport(){
+  document.getElementById('importModal').classList.add('open');
+  document.getElementById('importText').value='';
+  document.getElementById('import-preview').innerHTML='';
+  document.getElementById('import-warn').textContent='';
+  parsedNodes=[];
+  updateImportUI();
+}
+function closeImport(){document.getElementById('importModal').classList.remove('open');}
+document.getElementById('importModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeImport();});
+
+function updateImportUI(){
+  const proto=document.getElementById('importProto').value;
+  const inP=document.getElementById('importInProto').value;
+  document.getElementById('import-ss-method').style.display=proto==='ss'?'':'none';
+  const showIn=inP!=='none';
+  document.getElementById('import-in-opts').style.display=showIn?'':'none';
+  document.getElementById('import-in-ss-opts').style.display=(showIn&&inP==='ss')?'':'none';
+  document.getElementById('import-in-mixed-opts').style.display=(showIn&&inP==='mixed')?'':'none';
+  document.getElementById('import-in-vless-opts').style.display=(showIn&&inP==='vless')?'':'none';
+  document.getElementById('import-in-vlws-opts').style.display=(showIn&&inP==='vless-ws')?'':'none';
+}
+
+function parseImport(){
+  const text=document.getElementById('importText').value.trim();
+  parsedNodes=[];
+  const warns=[];
+  text.split('\n').map(l=>l.trim()).filter(l=>l&&!l.startsWith('#')).forEach((line,i)=>{
+    const idx1=line.indexOf(':');
+    if(idx1<0){warns.push(`第${i+1}行无效`);return;}
+    const idx2=line.indexOf(':',idx1+1);
+    if(idx2<0){warns.push(`第${i+1}行端口缺失`);return;}
+    const idx3=line.indexOf(':',idx2+1);
+    if(idx3<0){warns.push(`第${i+1}行用户名缺失`);return;}
+    const host=line.slice(0,idx1);
+    const port=parseInt(line.slice(idx1+1,idx2));
+    const user=line.slice(idx2+1,idx3);
+    const pass=line.slice(idx3+1);
+    if(!host||isNaN(port)){warns.push(`第${i+1}行解析失败`);return;}
+    parsedNodes.push({host,port,user,pass});
+  });
+  const prev=document.getElementById('import-preview');
+  prev.innerHTML=parsedNodes.length?`<div style="font-size:10px;color:var(--green);margin-bottom:4px">✓ 解析到 ${parsedNodes.length} 个节点</div><div class="parsed-preview">${parsedNodes.map((n,i)=>`<div class="pp-row"><span class="pp-num">#${i+1}</span><span class="pp-host">${n.host}</span><span class="pp-port">:${n.port}</span><span class="pp-user">${n.user}</span><span class="pp-pass">${n.pass}</span></div>`).join('')}</div>` : '';
+  document.getElementById('import-warn').textContent=warns.join('\n');
+  document.getElementById('importBtn').disabled=!parsedNodes.length;
+}
+
+function doImport(){
+  if(!parsedNodes.length)return;
+  const proto=document.getElementById('importProto').value;
+  const inP=document.getElementById('importInProto').value;
+  const ssMethod=document.getElementById('importSsMethod').value;
+  const maxIbP=Math.max(...inbounds.map(i=>i.port),60088);
+  let nextPort=maxIbP+1;
+  if(inP==='ss')nextPort=parseInt(document.getElementById('imp-ss-sport').value)||nextPort;
+  if(inP==='mixed')nextPort=parseInt(document.getElementById('imp-mx-sport').value)||nextPort;
+  if(inP==='vless')nextPort=parseInt(document.getElementById('imp-vl-sport').value)||nextPort;
+
+  parsedNodes.forEach((n,i)=>{
+    const idx=String(i+1).padStart(2,'0');
+    const shortHost=n.host.split('.')[0];
+    const outTagBase=`OUT_${proto.toUpperCase()}_${idx}_${shortHost}`;
+    const outTag=uniqueTagGlobal(outTagBase); // 关键修复：避免 tag 重复导致 IP 串台
+    const ob={id:uid(),type:proto,tag:outTag,address:n.host,port:n.port,method:ssMethod,password:'',email:'bridge-user',socksUser:'',socksPass:'',httpTls:'false',routeDomains:'',routeInbounds:[]};
+    if(proto==='socks5'||proto==='http'){ob.socksUser=n.user;ob.socksPass=n.pass;}
+    else if(proto==='ss'){ob.password=n.pass;}
+    outbounds.push(ob);
+
+    if(inP!=='none'){
+      const ibPort=nextPort+i;
+      const ibTagBase=`${inP==='vless-ws'?'VLWS':inP.toUpperCase().replace('MIXED','MX')}-IN_${idx}_${shortHost}`;
+      const ibTag=uniqueTagGlobal(ibTagBase);
+      const ssP=document.getElementById('imp-ss-pass').value;
+      const mxU=document.getElementById('imp-mx-user').value;
+      const mxP=document.getElementById('imp-mx-pass').value;
+      const vt=document.getElementById('imp-vl-target').value;
+      const vk=document.getElementById('imp-vl-key').value;
+      const vs=document.getElementById('imp-vl-sid').value;
+      const vn=document.getElementById('imp-vl-sni').value;
+      const vlwsHost=document.getElementById('imp-vlws-host')?.value||'';
+      const vlwsPath=document.getElementById('imp-vlws-path')?.value||'/download/update.bin';
+      inbounds.push({id:uid(),type:inP,tag:ibTag,port:ibPort,ssMethod:'2022-blake3-aes-256-gcm',ssPass:ssP||genSSPass(),mxUser:mxU,mxPass:mxP,mxListen:'0.0.0.0',rTarget:vt,rKey:vk,rSid:vs||genShortId(),rSni:vn,wsPath:vlwsPath,cfHost:vlwsHost,outRef:outTag});
+    }
+  });
+  closeImport();
+  renderAll();
+}
+
+// ===== GENERATE JSON =====
+function generateConfig(){
+  // 最后一道防线：生成前强制去重 Tag（防止有漏网之鱼）
+  const seenTags=new Set();
+  inbounds.forEach(ib=>{
+    if(seenTags.has(ib.tag)){
+      const oldTag=ib.tag;
+      let n=2;
+      while(seenTags.has(`${oldTag}_${String(n).padStart(2,'0')}`))n++;
+      ib.tag=`${oldTag}_${String(n).padStart(2,'0')}`;
+      console.warn(`[自动去重] 入站 ${oldTag} → ${ib.tag}`);
+    }
+    seenTags.add(ib.tag);
+  });
+  outbounds.forEach(ob=>{
+    if(seenTags.has(ob.tag)){
+      const oldTag=ob.tag;
+      let n=2;
+      while(seenTags.has(`${oldTag}_${String(n).padStart(2,'0')}`))n++;
+      // 更新引用
+      inbounds.forEach(ib=>{if(ib.outRef===oldTag)ib.outRef=`${oldTag}_${String(n).padStart(2,'0')}`;});
+      ob.tag=`${oldTag}_${String(n).padStart(2,'0')}`;
+      console.warn(`[自动去重] 出站 ${oldTag} → ${ob.tag}`);
+    }
+    seenTags.add(ob.tag);
+  });
+  const IP_CHECK=['domain:ping0.cc','domain:ipinfo.io','domain:scamalytics.com','domain:spur.us','domain:ipqualityscore.com','domain:whoer.net','domain:ipleak.net','domain:browserleaks.com','domain:abuseipdb.com','domain:criminalip.io','domain:fraudguard.io','domain:proxycheck.io','domain:ip.sb','domain:ip.cn','domain:bgp.he.net','domain:bgp.tools','domain:ipdata.co','domain:ipapi.com','domain:ipapi.is','domain:ip2location.com','domain:iplark.com','domain:ipregistry.co','domain:ipgeolocation.io','domain:db-ip.com','domain:maxmind.com','domain:ipstack.com','domain:abstractapi.com','domain:ipwhois.io','domain:iphub.info','domain:getipintel.net'];
+  const rules=[];
+
+  // DNS 配置节
+  const dnsLog=document.getElementById('dnsLog')?.checked||false;
+  const hasDnsCfg=dnsCfgEnabled;
+  const dnsServers=(document.getElementById('dns-servers')?.value||'1.1.1.1,1.0.0.1').split(',').map(s=>s.trim()).filter(Boolean);
+  const dnsStrategy=document.getElementById('dns-strategy')?.value||'UseIP';
+  const dnsDisableCache=document.getElementById('dns-disable-cache')?.checked||false;
+  // dns-in 路由规则（在 DNS 53 劫持之前）
+  if(hasDnsCfg){
+    rules.push({type:'field',ruleTag:'DNS 劫持 (防明文泄漏)',inboundTag:['dns-in'],outboundTag:'DNS-OUT'});
+  }
+  if(opts.dns)rules.push({type:'field',ruleTag:'DNS 53端口劫持',port:'53',network:'udp,tcp',outboundTag:'DNS-OUT'});
+  if(opts.bt)rules.push({type:'field',ruleTag:'屏蔽BT/PT流量',protocol:['bittorrent'],outboundTag:'BLOCK'});
+  if(opts.priv){rules.push({type:'field',ruleTag:'屏蔽私有/保留IP',ip:['geoip:private'],outboundTag:'BLOCK'});rules.push({type:'field',ruleTag:'屏蔽私有域名',domain:['geosite:private'],outboundTag:'BLOCK'});}
+  if(opts.ads)rules.push({type:'field',ruleTag:'广告追踪',domain:['geosite:category-ads-all'],outboundTag:'BLOCK'});
+  if(opts.ipc)rules.push({type:'field',ruleTag:'IP纯净度检测站',domain:IP_CHECK,outboundTag:'BLOCK'});
+  if(opts.spd)rules.push({type:'field',ruleTag:'测速网站',domain:['geosite:category-speedtest'],outboundTag:'BLOCK'});
+  if(opts.gam)rules.push({type:'field',ruleTag:'博彩',domain:['domain:bet365.com','domain:pokerstars.com','domain:888casino.com','domain:williamhill.com','domain:betway.com','domain:draftkings.com','domain:fanduel.com','domain:sbobet.com','domain:stake.com','domain:rollbit.com'],outboundTag:'BLOCK'});
+  if(opts.porn)rules.push({type:'field',ruleTag:'成人内容',domain:['geosite:category-porn'],outboundTag:'BLOCK'});
+  if(opts.tik)rules.push({type:'field',ruleTag:'TikTok/ByteDance',domain:['geosite:tiktok','geosite:bytedance'],outboundTag:'BLOCK'});
+  if(opts.ai)rules.push({type:'field',ruleTag:'AI海外',domain:['geosite:category-ai-chat-!cn'],outboundTag:'BLOCK'});
+  if(opts.crypto)rules.push({type:'field',ruleTag:'加密货币',domain:['geosite:category-cryptocurrency'],outboundTag:'BLOCK'});
+  if(opts.cn){rules.push({type:'field',ruleTag:'中国大陆IP',ip:['geoip:cn'],outboundTag:'BLOCK'});rules.push({type:'field',ruleTag:'中国大陆域名',domain:['geosite:cn'],outboundTag:'BLOCK'});}
+  if(opts.stream)rules.push({type:'field',ruleTag:'流媒体直连',domain:['geosite:netflix','geosite:youtube','geosite:disney'],outboundTag:'DIRECT'});
+  // Custom block domains
+  const cbText=(document.getElementById('custom-block')?.value||'').trim();
+  if(cbText){const cd=cbText.split('\n').map(l=>l.trim()).filter(l=>l);if(cd.length)rules.push({type:'field',ruleTag:'自定义屏蔽',domain:cd,outboundTag:'BLOCK'});}
+  // Custom direct domains
+  const cdText=(document.getElementById('custom-direct')?.value||'').trim();
+  if(cdText){const cd=cdText.split('\n').map(l=>l.trim()).filter(l=>l);if(cd.length)rules.push({type:'field',ruleTag:'自定义直连',domain:cd,outboundTag:'DIRECT'});}
+  inbounds.forEach(ib=>{if(ib.outRef){
+    // outRef 存的是 tag，找对应 outbound
+    const ob=outbounds.find(o=>o.tag===ib.outRef);
+    // direct 类型出站直接用其 tag（可能是 OUT_DIRECT 或其他自定义名）
+    // 如果找不到（比如绑定了内置 DIRECT），用 DIRECT
+    const outTag=ob?ob.tag:(ib.outRef==='DIRECT'?'DIRECT':ib.outRef);
+    if(routeMode==='full'){
+      rules.push({type:'field',ruleTag:`${ib.tag} → ${outTag}`,inboundTag:[ib.tag],outboundTag:outTag});
+    }
+  }});
+  if(routeMode==='direct'){
+    outbounds.forEach(ob=>{
+      if(ob.type==='direct')return;
+      const rd=(ob.routeDomains||'').trim();
+      if(!rd)return;
+      const domains=rd.split('\n').map(l=>l.trim()).filter(l=>l);
+      if(!domains.length)return;
+      // 分离 domain: / geosite: / keyword: 和 ip: / geoip: 规则
+      const domainItems=domains.filter(d=>/^(domain:|geosite:|keyword:|regexp:|full:)/i.test(d)||(!d.startsWith('ip:')&&!d.startsWith('geoip:')));
+      const ipItems=domains.filter(d=>/^(ip:|geoip:)/i.test(d));
+      // 获取限定入站 tag 列表
+      const limitIbTags=(ob.routeInbounds||[])
+        .map(ibId=>inbounds.find(ib=>ib.id===ibId)?.tag)
+        .filter(Boolean);
+      const mkRule=(base)=>{
+        const r={type:'field',ruleTag:`分流→${ob.tag}${limitIbTags.length?'（限定入站）':''}`, ...base, outboundTag:ob.tag};
+        if(limitIbTags.length)r.inboundTag=limitIbTags;
+        return r;
+      };
+      if(domainItems.length)rules.push(mkRule({domain:domainItems}));
+      if(ipItems.length)rules.push(mkRule({ip:ipItems}));
+    });
+  }
+  const sniff={enabled:true,destOverride:['http','tls','quic']};
+  const ibArr=inbounds.map(ib=>{
+    if(ib.type==='ss')return{tag:ib.tag,port:ib.port,protocol:'shadowsocks',settings:{method:ib.ssMethod,clients:[],network:'tcp,udp',password:ib.ssPass},sniffing:sniff};
+    if(ib.type==='vless')return{tag:ib.tag,port:ib.port,listen:'0.0.0.0',protocol:'vless',settings:{clients:[],decryption:'none'},sniffing:sniff,streamSettings:{network:'raw',security:'reality',realitySettings:{target:ib.rTarget,shortIds:[ib.rSid],privateKey:ib.rKey,serverNames:[ib.rSni]}}};
+    if(ib.type==='vless-ws')return{tag:ib.tag,port:ib.port,listen:'0.0.0.0',protocol:'vless',settings:{clients:[],decryption:'none'},sniffing:sniff,streamSettings:{network:'ws',security:'none',wsSettings:{path:ib.wsPath||'/download/update.bin',headers:{Host:ib.cfHost||''}}}};
+    if(ib.type==='trojan')return{tag:ib.tag,port:ib.port,listen:'0.0.0.0',protocol:'trojan',settings:{clients:[{password:ib.trojanPass||''}]},sniffing:sniff,streamSettings:{network:'tcp',security:'tls',tlsSettings:{certificates:[{certificateFile:ib.tlsCert||'',keyFile:ib.tlsKey||''}]}}};
+    return{tag:ib.tag,port:ib.port,listen:ib.mxListen,protocol:'mixed',settings:{udp:true,auth:'password',accounts:[{user:ib.mxUser,pass:ib.mxPass}]},sniffing:sniff};
+  });
+  const makeObJson=ob=>{
+    if(ob.type==='direct')return{tag:ob.tag,protocol:'freedom',settings:{domainStrategy:'UseIPv4v6'}};
+    if(ob.type==='ss'){
+      const srv={address:ob.address,port:ob.port,method:ob.method,password:ob.password,level:0};
+      if(ob.email)srv.email=ob.email;
+      return{tag:ob.tag,protocol:'shadowsocks',settings:{servers:[srv]}};
+    }
+    if(ob.type==='http'){
+      const h={tag:ob.tag,protocol:'http',settings:{servers:[{address:ob.address,port:ob.port}]}};
+      if(ob.socksUser)h.settings.servers[0].users=[{user:ob.socksUser,pass:ob.socksPass}];
+      if(ob.httpTls==='true')h.settings.servers[0].tls=true;
+      return h;
+    }
+    const srv={address:ob.address,port:ob.port};
+    if(ob.socksUser)srv.users=[{user:ob.socksUser,pass:ob.socksPass}];
+    return{tag:ob.tag,protocol:'socks',settings:{servers:[srv]}};
+  };
+  const obArr=routeMode==='direct'
+    ? [
+        // 直连优先：DIRECT 放第一位作为默认出站
+        {tag:'DIRECT',protocol:'freedom',settings:{domainStrategy:'UseIPv4v6'}},
+        {tag:'BLOCK',protocol:'blackhole'},
+        ...(opts.dns?[{tag:'DNS-OUT',protocol:'dns'}]:[]),
+        ...outbounds.filter(o=>o.type!=='direct').map(makeObJson),
+      ]
+    : [
+        // 落地优先：落地出站放第一位作为默认
+        ...outbounds.filter(o=>o.type!=='direct').map(makeObJson),
+        {tag:'DIRECT',protocol:'freedom',settings:{domainStrategy:'UseIPv4v6'}},
+        {tag:'BLOCK',protocol:'blackhole'},
+        ...(opts.dns?[{tag:'DNS-OUT',protocol:'dns'}]:[]),
+      ];
+  const logObj={loglevel:document.getElementById('loglevel').value};
+  if(dnsLog)logObj.dnsLog=true;
+
+  const cfg={log:logObj,inbounds:ibArr,outbounds:obArr,routing:{rules,domainStrategy:'IPIfNonMatch'},policy:{levels:{'0':{connIdle:300,handshake:4,uplinkOnly:2,downlinkOnly:5}},system:{statsInboundUplink:false,statsOutboundUplink:false,statsInboundDownlink:false,statsOutboundDownlink:false}}};
+
+  if(hasDnsCfg){
+    cfg.dns={tag:'dns-in',servers:dnsServers,disableCache:dnsDisableCache,queryStrategy:dnsStrategy};
+  }
+
+  return cfg;
+}
+
+function highlight(json){
+  return json.replace(/("(?:[^"\\]|\\.)*"(?:\s*:)?|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,m=>{
+    if(/^".*":\s*$/.test(m)||/^".*":$/.test(m.trim()))return`<span class="k">${m}</span>`;
+    if(/^"/.test(m))return`<span class="s">${m}</span>`;
+    if(/true|false|null/.test(m))return`<span class="b">${m}</span>`;
+    return`<span class="n">${m}</span>`;
+  });
+}
+
+function render(){
+  try{
+    const cfg=generateConfig();
+    const json=JSON.stringify(cfg,null,2);
+    const el=document.getElementById('preview');
+    if(el.tagName==='TEXTAREA')el.value=json;
+    else el.innerHTML=highlight(json);
+    document.getElementById('st-in').textContent=inbounds.length;
+    document.getElementById('st-out').textContent=outbounds.length;
+    document.getElementById('st-rules').textContent=cfg.routing.rules.length;
+    const ports=inbounds.map(i=>i.port).sort((a,b)=>a-b);
+    document.getElementById('st-ports').textContent=ports.length?`${ports[0]}–${ports[ports.length-1]}`:'—';
+    const portCount={};
+    inbounds.forEach(ib=>{portCount[ib.port]=(portCount[ib.port]||0)+1;});
+    const conflicts=Object.entries(portCount).filter(([,v])=>v>1).map(([k])=>k);
+    const cEl=document.getElementById('st-conflict');
+    if(conflicts.length){cEl.style.display='';cEl.textContent=`⚠ 端口冲突: ${conflicts.join(', ')}`;}
+    else cEl.style.display='none';
+  }catch(e){const el=document.getElementById('preview');if(el.tagName==='TEXTAREA')el.value='JSON生成错误: '+e.message;else el.textContent='JSON生成错误: '+e.message;}
+}
+
+function copyConfig(){
+  navigator.clipboard.writeText(JSON.stringify(generateConfig(),null,2)).then(()=>{
+    const btn=document.getElementById('copyBtn');
+    btn.textContent='✓ 已复制';btn.classList.add('ok');
+    setTimeout(()=>{btn.textContent='⎘ 复制';btn.classList.remove('ok');},2000);
+  });
+}
+function downloadConfig(){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(generateConfig(),null,2)],{type:'application/json'}));
+  a.download='config.json';a.click();
+}
+
+// ===== PASTE CONFIG IMPORT =====
+function openPaste(){
+  document.getElementById('pasteText').value='';
+  document.getElementById('paste-result').innerHTML='';
+  document.getElementById('pasteModal').classList.add('open');
+}
+function closePaste(){document.getElementById('pasteModal').classList.remove('open');}
+document.getElementById('pasteModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closePaste();});
+
+function doPasteImport(){
+  const text=document.getElementById('pasteText').value.trim();
+  const res=document.getElementById('paste-result');
+  if(!text){res.innerHTML='<span style="color:var(--red)">请先粘贴内容</span>';return;}
+
+  const log=[];
+
+  // ── 检测是 URI 还是 JSON ──
+  const lines=text.split('\n').map(l=>l.trim()).filter(l=>l);
+  const isUriMode=lines.some(l=>/^(vless|ss|trojan):\/\//i.test(l));
+
+  if(isUriMode){
+    // ── URI 批量导入（追加到现有入站，不替换） ──
+    const added=[];
+    lines.forEach(line=>{
+      const uri=line.split('#')[0].trim(); // 去掉 #remarks 避免干扰解析
+      const fragment=decodeURIComponent(line.includes('#')?line.split('#').slice(1).join('#'):'');
+      try{
+        if(/^vless:\/\//i.test(uri)) added.push(parseVlessUri(uri, fragment, log));
+        else if(/^ss:\/\//i.test(uri))  added.push(parseSsUri(uri, fragment, log));
+        else if(/^trojan:\/\//i.test(uri)) added.push(parseTrojanUri(uri, fragment, log));
+      }catch(e){log.push(`⚠ 解析失败: ${e.message}`);}
+    });
+    const valid=added.filter(Boolean);
+    if(!valid.length){res.innerHTML=`<div style="color:var(--red)">未能识别任何 URI</div>`+log.map(l=>`<div style="color:var(--yellow)">${l}</div>`).join('');return;}
+    // 关键：去重 tag，避免同名覆盖
+    valid.forEach(ib=>{ ib.tag=uniqueTagGlobal(ib.tag); inbounds.push(ib); });
+    res.innerHTML=`<div style="color:var(--green);font-weight:700">✓ 导入 ${valid.length} 个入站节点</div>`+log.map(l=>`<div style="color:${l.startsWith('⚠')?'var(--yellow)':'var(--text2)'}">${l}</div>`).join('');
+    renderAll();
+    setTimeout(closePaste,1400);
+    return;
+  }
+
+  // ── JSON 模式 ──
+  let cfg;
+  try{cfg=JSON.parse(text);}
+  catch(e){res.innerHTML=`<span style="color:var(--red)">JSON 解析失败：${e.message}</span>`;return;}
+
+  const newInbounds=[], newOutbounds=[];
+  if(cfg.log?.loglevel){const ll=document.getElementById('loglevel');if(ll)ll.value=cfg.log.loglevel;log.push(`日志级别: ${cfg.log.loglevel}`);}
+  if(cfg.log?.dnsLog){const el=document.getElementById('dnsLog');if(el)el.checked=true;}
+  // 恢复 DNS 配置节
+  if(cfg.dns){
+    dnsCfgEnabled=true;
+    const tog=document.getElementById('tog-dns-cfg');if(tog)tog.classList.add('on');
+    const body=document.getElementById('dns-cfg-body');if(body)body.style.display='flex';
+    const srvEl=document.getElementById('dns-servers');
+    if(srvEl)srvEl.value=(cfg.dns.servers||[]).join(',');
+    const stEl=document.getElementById('dns-strategy');
+    if(stEl)stEl.value=cfg.dns.queryStrategy||'UseIP';
+    const dcEl=document.getElementById('dns-disable-cache');
+    if(dcEl)dcEl.checked=!!cfg.dns.disableCache;
+    log.push(`✓ DNS配置: ${(cfg.dns.servers||[]).join(',')} queryStrategy=${cfg.dns.queryStrategy||'UseIP'}`);
+  }
+
+  (cfg.inbounds||[]).forEach(ib=>{
+    const base={id:uid(),tag:ib.tag||'',port:ib.port||0,ssMethod:'2022-blake3-aes-256-gcm',ssPass:'',mxUser:'',mxPass:'',mxListen:ib.listen||'0.0.0.0',rTarget:'',rKey:'',rSid:'',rSni:'',wsPath:'/download/update.bin',cfHost:'',outRef:'',routeDomains:''};
+    if(ib.protocol==='shadowsocks'){base.type='ss';base.ssMethod=ib.settings?.method||'2022-blake3-aes-256-gcm';base.ssPass=ib.settings?.password||'';newInbounds.push(base);log.push(`✓ SS入站: ${ib.tag} :${ib.port}`);}
+    else if(ib.protocol==='vless'){
+      const ss=ib.streamSettings;
+      if(ss?.network==='ws'){base.type='vless-ws';base.wsPath=ss.wsSettings?.path||'/';base.cfHost=ss.wsSettings?.headers?.Host||'';newInbounds.push(base);log.push(`✓ VLESS-WS入站: ${ib.tag}`);}
+      else{base.type='vless';const rs=ss?.realitySettings||{};base.rTarget=rs.target||rs.dest||'';base.rKey=rs.privateKey||'';base.rSid=(rs.shortIds||[])[0]||'';base.rSni=(rs.serverNames||[])[0]||'';newInbounds.push(base);log.push(`✓ VLESS入站: ${ib.tag}`);}
+    }else if(ib.protocol==='mixed'||ib.protocol==='socks'){base.type='mixed';const acc=(ib.settings?.accounts||[])[0]||{};base.mxUser=acc.user||'';base.mxPass=acc.pass||'';newInbounds.push(base);log.push(`✓ MIXED入站: ${ib.tag}`);}
+    else log.push(`⚠ 跳过未知入站: ${ib.protocol}`);
+  });
+
+  const SYS=new Set(['DIRECT','BLOCK','DNS-OUT']);
+  (cfg.outbounds||[]).forEach(ob=>{
+    if(SYS.has(ob.tag))return; // 只跳过系统保留tag，不按协议过滤
+    const base={id:uid(),tag:ob.tag||'',address:'',port:0,method:'aes-256-gcm',password:'',socksUser:'',socksPass:'',httpTls:'false',routeDomains:''};
+    if(ob.protocol==='shadowsocks'){base.type='ss';const s=(ob.settings?.servers||[])[0]||ob.settings||{};base.address=s.address||'';base.port=s.port||0;base.method=s.method||'aes-256-gcm';base.password=s.password||'';newOutbounds.push(base);log.push(`✓ SS出站: ${ob.tag}`);}
+    else if(ob.protocol==='socks'){base.type='socks5';const s=(ob.settings?.servers||[])[0]||{};base.address=s.address||'';base.port=s.port||0;const u=(s.users||[])[0]||{};base.socksUser=u.user||'';base.socksPass=u.pass||'';newOutbounds.push(base);log.push(`✓ SOCKS5出站: ${ob.tag}`);}
+    else if(ob.protocol==='http'){base.type='http';const s=(ob.settings?.servers||[])[0]||{};base.address=s.address||'';base.port=s.port||0;if((s.users||[]).length){base.socksUser=s.users[0].user||'';base.socksPass=s.users[0].pass||'';}base.httpTls=s.tls?'true':'false';newOutbounds.push(base);log.push(`✓ HTTP出站: ${ob.tag}`);}
+    else if(ob.protocol==='freedom'){base.type='direct';newOutbounds.push(base);log.push(`✓ DIRECT出站: ${ob.tag}`);}
+    else log.push(`⚠ 跳过: ${ob.protocol}`);
+  });
+
+  const routingMap={};
+  (cfg.routing?.rules||[]).forEach(r=>{if(r.inboundTag?.length&&r.outboundTag)r.inboundTag.forEach(t=>routingMap[t]=r.outboundTag);});
+  const rules=cfg.routing?.rules||[];
+  const hd=d=>rules.some(r=>(r.domain||[]).some(x=>x.includes(d)));
+  const hp=p=>rules.some(r=>(r.protocol||[]).includes(p));
+  const hi=ip=>rules.some(r=>(r.ip||[]).includes(ip));
+  opts.dns=rules.some(r=>r.port==='53');opts.bt=hp('bittorrent');opts.priv=hi('geoip:private');
+  opts.ads=hd('category-ads-all');opts.ipc=hd('ipinfo.io');opts.spd=hd('category-speedtest');
+  opts.gam=hd('bet365.com');opts.porn=hd('category-porn');opts.tik=hd('tiktok');
+  opts.ai=hd('category-ai-chat');opts.crypto=hd('category-cryptocurrency');opts.cn=hi('geoip:cn');
+
+  newInbounds.forEach(ib=>{
+    const mappedTag=routingMap[ib.tag];
+    // 统一用 tag 存 outRef，和其他地方保持一致
+    if(mappedTag&&newOutbounds.find(o=>o.tag===mappedTag)){
+      ib.outRef=mappedTag;
+    } else {
+      ib.outRef=newOutbounds[0]?.tag||'';
+    }
+  });
+
+  if(!newInbounds.length&&!newOutbounds.length){res.innerHTML=`<span style="color:var(--red)">未识别到入站或出站</span>`;return;}
+  inbounds=newInbounds;outbounds=newOutbounds;
+  inbounds.forEach(ib=>{if(!ib.outRef)ib.outRef=outbounds[0]?.tag||'';});
+  const loglevelEl=document.getElementById('loglevel');if(loglevelEl&&cfg.log?.loglevel)loglevelEl.value=cfg.log.loglevel;
+  res.innerHTML=`<div style="color:var(--green);font-weight:700">✓ JSON 导入成功</div>`+log.map(l=>`<div style="color:${l.startsWith('⚠')?'var(--yellow)':'var(--text2)'}">${l}</div>`).join('');
+  renderAll();
+  setTimeout(closePaste,1400);
+}
+
+// ── URI 解析辅助函数 ──
+function b64decode(s){
+  // padding-tolerant base64 decode → string
+  s=s.replace(/-/g,'+').replace(/_/g,'/');
+  while(s.length%4)s+='=';
+  try{return atob(s);}catch{return '';}
+}
+
+function parseVlessUri(uri, name, log){
+  const withoutScheme=uri.replace(/^vless:\/\//i,'');
+  const qIdx=withoutScheme.indexOf('?');
+  const authorityRaw=qIdx>=0?withoutScheme.slice(0,qIdx):withoutScheme;
+  const queryStr=qIdx>=0?withoutScheme.slice(qIdx+1):'';
+  const params=new URLSearchParams(queryStr);
+
+  let uuid='', host='', port=60443;
+
+  if(authorityRaw.includes('@')){
+    // 标准格式: uuid@host:port
+    const atIdx=authorityRaw.lastIndexOf('@');
+    const userInfo=authorityRaw.slice(0,atIdx);
+    const hostPort=authorityRaw.slice(atIdx+1);
+    uuid=userInfo.replace(/^(none|auto|zero):/i,'');
+    [host,port]=[hostPort.split(':')[0], parseInt(hostPort.split(':')[1])||60443];
+  } else {
+    // 整体 base64 格式: BASE64(none:uuid@host:port)
+    const decoded=b64decode(authorityRaw);
+    if(!decoded){log.push('⚠ VLESS URI base64 解码失败');return null;}
+    const atIdx=decoded.lastIndexOf('@');
+    const userInfo=decoded.slice(0,atIdx);
+    const hostPort=decoded.slice(atIdx+1);
+    uuid=userInfo.replace(/^(none|auto|zero):/i,'');
+    [host,port]=[hostPort.split(':')[0], parseInt(hostPort.split(':')[1])||60443];
+  }
+
+  const sni=params.get('sni')||params.get('peer')||params.get('serverName')||host;
+  const pbk=params.get('pbk')||params.get('publicKey')||'';
+  const sid=params.get('sid')||'';
+  const network=params.get('type')||params.get('network')||'tcp';
+  const wsPath=params.get('path')||'/';
+  const wsHost=params.get('host')||sni;
+  const tag=name||(params.get('remarks'))||`VLESS-${host}:${port}`;
+
+  const base={id:uid(),tag,port,mxUser:'',mxPass:'',mxListen:'0.0.0.0',ssMethod:'',ssPass:'',wsPath,cfHost:wsHost,outRef:'',routeDomains:''};
+
+  if(network==='ws'){
+    base.type='vless-ws';
+    base.rTarget='';base.rKey='';base.rSid='';base.rSni=sni;
+    log.push(`✓ VLESS+WS: ${tag}  ${host}:${port}`);
+  } else {
+    base.type='vless';
+    base.rTarget=`${sni}:443`;
+    base.rKey=''; // 客户端 URI 只有公钥 pbk，私钥需在面板里填
+    base.rSid=sid;
+    base.rSni=sni;
+    log.push(`✓ VLESS+Reality: ${tag}  ${host}:${port}  UUID: ${uuid.slice(0,8)}…  SNI: ${sni}  ShortId: ${sid}${pbk?'  (已获取公钥，私钥需手动填)':''}`);
+    if(pbk)base._note=`公钥(供参考): ${pbk}`;
+  }
+  return base;
+}
+
+function parseSsUri(uri, name, log){
+  // ss://BASE64(method:password)@host:port?params  OR  ss://BASE64@host:port (ShadowsocksR style)
+  const withoutScheme=uri.replace(/^ss:\/\//i,'');
+  const atIdx=withoutScheme.lastIndexOf('@');
+  let userB64=withoutScheme.slice(0,atIdx);
+  const hostPort=withoutScheme.split('?')[0].slice(atIdx+1);
+  const [host,portStr]=hostPort.split(':');
+  const port=parseInt(portStr)||60089;
+  const params=new URLSearchParams(withoutScheme.includes('?')?withoutScheme.split('?')[1]:'');
+
+  const decoded=b64decode(userB64);
+  let method='',password='';
+  if(decoded.includes(':')){
+    const ci=decoded.indexOf(':');
+    method=decoded.slice(0,ci);
+    password=decoded.slice(ci+1);
+  } else {
+    // try userB64 directly as method:pass without base64
+    if(userB64.includes(':')){const ci=userB64.indexOf(':');method=userB64.slice(0,ci);password=userB64.slice(ci+1);}
+    else {method='aes-256-gcm';password=userB64;}
+  }
+
+  const tag=name||(params.get('remarks'))||`SS-${host}:${port}`;
+  log.push(`✓ SS 入站: ${tag} → ${host}:${port}  方法: ${method}`);
+  return {id:uid(),type:'ss',tag,port,ssMethod:method,ssPass:password,
+    mxUser:'',mxPass:'',mxListen:'0.0.0.0',rTarget:'',rKey:'',rSid:'',rSni:'',
+    wsPath:'/download/update.bin',cfHost:'',outRef:'',routeDomains:''};
+}
+
+function parseTrojanUri(uri, name, log){
+  const withoutScheme=uri.replace(/^trojan:\/\//i,'');
+  const [authority,queryStr]=withoutScheme.split('?');
+  const atIdx=authority.lastIndexOf('@');
+  const password=authority.slice(0,atIdx);
+  const hostPort=authority.slice(atIdx+1);
+  const [host,portStr]=hostPort.split(':');
+  const port=parseInt(portStr)||443;
+  const tag=name||`TROJAN-${host}:${port}`;
+  log.push(`✓ Trojan 入站: ${tag} → ${host}:${port}`);
+  return {id:uid(),type:'trojan',tag,port,trojanPass:password,tlsCert:'',tlsKey:'',
+    ssMethod:'',ssPass:'',mxUser:'',mxPass:'',mxListen:'0.0.0.0',
+    rTarget:'',rKey:'',rSid:'',rSni:'',wsPath:'',cfHost:'',outRef:'',routeDomains:''};
+}
+let rpNodes=[], rpAssign=[];
+
+function openReplace(){
+  rpNodes=[];rpAssign=[];
+  document.getElementById('rpText').value='';
+  document.getElementById('rp-parse-result').innerHTML='';
+  document.getElementById('rp-warn').textContent='';
+  document.getElementById('rp-step1').style.display='';
+  document.getElementById('rp-step2').style.display='none';
+  document.getElementById('rpNextBtn').style.display='none';
+  document.getElementById('rpApplyBtn').style.display='none';
+  document.getElementById('rp-ss-method').style.display='none';
+  document.getElementById('replaceModal').classList.add('open');
+}
+function closeReplace(){document.getElementById('replaceModal').classList.remove('open');}
+document.getElementById('replaceModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeReplace();});
+document.getElementById('rpProto').addEventListener('change',()=>{
+  document.getElementById('rp-ss-method').style.display=document.getElementById('rpProto').value==='ss'?'':'none';
+});
+
+function parseNode(line){
+  const i1=line.indexOf(':'),i2=line.indexOf(':',i1+1),i3=line.indexOf(':',i2+1);
+  if(i1<0||i2<0||i3<0)return null;
+  const host=line.slice(0,i1),port=parseInt(line.slice(i1+1,i2)),user=line.slice(i2+1,i3),pass=line.slice(i3+1);
+  if(!host||isNaN(port))return null;
+  return{host,port,user,pass};
+}
+
+function parseReplace(){
+  const text=document.getElementById('rpText').value.trim();
+  rpNodes=[];const warns=[];
+  text.split('\n').map(l=>l.trim()).filter(l=>l&&!l.startsWith('#')).forEach((line,i)=>{
+    const n=parseNode(line);
+    if(!n)warns.push(`第${i+1}行格式错误`);else rpNodes.push(n);
+  });
+  document.getElementById('rp-parse-result').innerHTML=rpNodes.length?`<div style="font-size:10px;color:var(--green);margin:4px 0">✓ 解析到 ${rpNodes.length} 个节点</div><div class="parsed-preview">${rpNodes.map((n,i)=>`<div class="pp-row"><span class="pp-num">#${i+1}</span><span class="pp-host">${n.host}</span><span class="pp-port">:${n.port}</span><span class="pp-user">${n.user}</span><span class="pp-pass">${n.pass.slice(0,24)}…</span></div>`).join('')}</div>`:'';
+  document.getElementById('rp-warn').textContent=warns.join('\n');
+  document.getElementById('rpNextBtn').style.display=rpNodes.length?'':'none';
+}
+
+function rpGoStep2(){
+  if(!rpNodes.length)return;
+  rpAssign=rpNodes.map((_,i)=>({action:i<outbounds.length?'replace':'add',targetId:i<outbounds.length?outbounds[i].id:''}));
+  document.getElementById('rp-step1').style.display='none';
+  document.getElementById('rp-step2').style.display='';
+  document.getElementById('rpNextBtn').style.display='none';
+  document.getElementById('rpApplyBtn').style.display='';
+  renderRpAssign();
+}
+
+function renderRpAssign(){
+  document.getElementById('rp-assign-list').innerHTML=rpNodes.map((n,i)=>{
+    const a=rpAssign[i];
+    const obOpts=outbounds.map(ob=>`<option value="${ob.id}" ${ob.id===a.targetId?'selected':''}>${esc(ob.tag)}</option>`).join('');
+    const sp=n.pass.length>26?n.pass.slice(0,26)+'…':n.pass;
+    return `<div style="display:flex;align-items:center;gap:5px;padding:5px 8px;border:1px solid var(--border);border-radius:5px;background:var(--bg4)">
+      <span style="color:var(--text3);font-size:10px;min-width:22px">#${i+1}</span>
+      <span style="color:var(--accent);font-size:10px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${n.host}:${n.port}</span>
+      <span style="color:var(--text3);font-size:10px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sp}</span>
+      <select class="rr-sel" style="width:76px" onchange="rpSetAction(${i},this.value)">
+        <option value="replace" ${a.action==='replace'?'selected':''}>替换</option>
+        <option value="add"     ${a.action==='add'    ?'selected':''}>新增</option>
+        <option value="skip"    ${a.action==='skip'   ?'selected':''}>跳过</option>
+      </select>
+      <select class="rr-sel" id="rp-tgt-${i}" style="width:155px;${a.action!=='replace'?'visibility:hidden':''}" onchange="rpSetTarget(${i},this.value)">${obOpts}</select>
+    </div>`;
+  }).join('');
+}
+
+function rpSetAction(i,val){
+  rpAssign[i].action=val;
+  const s=document.getElementById(`rp-tgt-${i}`);
+  if(s)s.style.visibility=val==='replace'?'visible':'hidden';
+  if(val==='replace'&&!rpAssign[i].targetId&&outbounds.length)rpAssign[i].targetId=outbounds[0].id;
+}
+function rpSetTarget(i,val){rpAssign[i].targetId=val;}
+
+function rpQuickFill(mode){
+  const startIdx=mode==='from'?Math.max(0,(parseInt(document.getElementById('rpFromIdx').value)||1)-1):0;
+  rpNodes.forEach((_,i)=>{
+    if(mode==='add'){rpAssign[i]={action:'add',targetId:''};return;}
+    if(mode==='skip'){rpAssign[i]={action:'skip',targetId:''};return;}
+    const obIdx=startIdx+i;
+    rpAssign[i]=obIdx<outbounds.length?{action:'replace',targetId:outbounds[obIdx].id}:{action:'add',targetId:''};
+  });
+  renderRpAssign();
+}
+
+function doReplace(){
+  const proto=document.getElementById('rpProto').value;
+  const ssMethod=document.getElementById('rpSsMethod').value;
+  // process replaces first, then adds (to avoid index shifting)
+  rpNodes.forEach((n,i)=>{
+    const a=rpAssign[i];
+    if(a.action==='skip')return;
+    const shortHost=n.host.split('.')[0];
+    const makeOb=(id,tag)=>({id,type:proto,tag,address:n.host,port:n.port,method:ssMethod,
+      password:proto==='ss'?n.pass:'',email:'bridge-user',socksUser:proto==='socks5'||proto==='http'?n.user:'',socksPass:proto==='socks5'||proto==='http'?n.pass:'',httpTls:'false',routeDomains:'',routeInbounds:[]});
+    if(a.action==='replace'&&a.targetId){
+      const idx=outbounds.findIndex(o=>o.id===a.targetId);
+      if(idx>=0){
+        const oldTag=outbounds[idx].tag;
+        outbounds[idx]=makeOb(a.targetId,oldTag); // keep original tag on replace
+      }
+    } else if(a.action==='add'){
+      const tagBase=`OUT_${proto.toUpperCase()}_${String(outbounds.length+1).padStart(2,'0')}_${shortHost}`;
+      const tag=uniqueTagGlobal(tagBase);
+      outbounds.push(makeOb(uid(),tag));
+    }
+  });
+  closeReplace();
+  renderAll();
+}
+
+// ===== ONE-CLICK KEYGEN =====
+async function genAllKeys(){
+  let count=0;
+  for(const ib of inbounds){
+    if(ib.type==='ss'){ib.ssPass=genSSPass();count++;}
+    if(ib.type==='vless'){
+      ib.rSid=genShortId();count++;
+      try{const kp=await genX25519();ib.rKey=kp.privateKey;count++;}catch(e){}
+    }
+    if(ib.type==='trojan'){ib.trojanPass=genSSPass();count++;}
+  }
+  renderAll();
+  const btn=document.querySelector('[onclick="genAllKeys()"]');
+  if(btn){const orig=btn.textContent;btn.textContent=`✓ 已刷新 ${count} 个密钥`;setTimeout(()=>btn.textContent=orig,2000);}
+}
+
+// ===== SAVE SLOTS =====
+const SLOT_KEY='remnawave_cfg_slots';
+function loadSlots(){try{return JSON.parse(localStorage.getItem(SLOT_KEY)||'[]');}catch{return[];}}
+function saveSlots(s){localStorage.setItem(SLOT_KEY,JSON.stringify(s));}
+
+function openSaveSlots(){renderSaveSlots();document.getElementById('saveSlotsModal').classList.add('open');}
+document.getElementById('saveSlotsModal').addEventListener('click',e=>{if(e.target===e.currentTarget)e.target.classList.remove('open');});
+
+function renderSaveSlots(){
+  const slots=loadSlots();
+  const list=document.getElementById('save-slots-list');
+  if(!slots.length){list.innerHTML='<div style="color:var(--text3);font-size:11px;padding:8px">暂无存档，点右下角「保存当前配置」</div>';return;}
+  list.innerHTML=slots.map((s,i)=>`
+    <div style="display:flex;align-items:center;gap:7px;padding:8px 10px;border:1px solid var(--border);border-radius:5px;background:var(--bg4)">
+      <div style="flex:1"><div style="font-size:11px;color:var(--text2)">${esc(s.name)}</div>
+        <div style="font-size:10px;color:var(--text3)">${s.date} · ${s.ic}入站 ${s.oc}出站</div></div>
+      <button class="gen-btn" onclick="loadSlot(${i})" style="color:var(--green)">载入</button>
+      <button class="gen-btn" onclick="renameSlot(${i})" style="color:var(--accent)">改名</button>
+      <button class="gen-btn" onclick="deleteSlot(${i})" style="color:var(--red)">删除</button>
+    </div>`).join('');
+}
+
+function saveCurrentSlot(){
+  const slots=loadSlots();
+  if(slots.length>=10){alert('最多10套，请先删除旧存档');return;}
+  const name=prompt('存档名称：','配置 '+(slots.length+1));
+  if(!name)return;
+  slots.push({name,date:new Date().toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}),
+    ic:inbounds.length,oc:outbounds.length,loglevel:document.getElementById('loglevel').value,
+    opts:{...opts},
+    inbounds:JSON.parse(JSON.stringify(inbounds)),
+    outbounds:JSON.parse(JSON.stringify(outbounds)),
+    cb:document.getElementById('custom-block')?.value||'',
+    cd:document.getElementById('custom-direct')?.value||''});
+  saveSlots(slots);renderSaveSlots();
+}
+
+function loadSlot(i){
+  const slots=loadSlots(),s=slots[i];
+  if(!s||!confirm(`载入「${s.name}」？当前配置将被覆盖`))return;
+  inbounds=s.inbounds;outbounds=s.outbounds;
+  Object.assign(opts,s.opts);
+  document.getElementById('loglevel').value=s.loglevel||'warning';
+  if(document.getElementById('custom-block'))document.getElementById('custom-block').value=s.cb||'';
+  if(document.getElementById('custom-direct'))document.getElementById('custom-direct').value=s.cd||'';
+  document.getElementById('saveSlotsModal').classList.remove('open');
+  renderAll();
+}
+function renameSlot(i){const slots=loadSlots();const n=prompt('新名称：',slots[i].name);if(!n)return;slots[i].name=n;saveSlots(slots);renderSaveSlots();}
+function deleteSlot(i){const slots=loadSlots();if(!confirm(`删除「${slots[i].name}」？`))return;slots.splice(i,1);saveSlots(slots);renderSaveSlots();}
+
+// ===== URI GENERATOR =====
+function openUriModal(){document.getElementById('uriModal').classList.add('open');renderUriList();}
+document.getElementById('uriModal').addEventListener('click',e=>{if(e.target===e.currentTarget)e.target.classList.remove('open');});
+
+function renderUriList(){
+  const server=(document.getElementById('uri-server-ip')?.value||'').trim()||'YOUR_SERVER_IP';
+  const list=document.getElementById('uri-list');
+  if(!inbounds.length){list.innerHTML='<div style="color:var(--text3);font-size:11px">暂无入站</div>';return;}
+  list.innerHTML=inbounds.map(ib=>{
+    let uris=[];
+    if(ib.type==='ss'){
+      const ui=btoa(`${ib.ssMethod}:${ib.ssPass}`);
+      uris=[{label:'SS URI',uri:`ss://${ui}@${server}:${ib.port}#${encodeURIComponent(ib.tag)}`}];
+    } else if(ib.type==='vless'){
+      uris=[{label:'VLESS+Reality（需填入公钥 pbk）',uri:`vless://UUID@${server}:${ib.port}?security=reality&sni=${ib.rSni}&pbk=YOUR_PUBLIC_KEY&sid=${ib.rSid}&fp=chrome&type=tcp&flow=xtls-rprx-vision#${encodeURIComponent(ib.tag)}`}];
+    } else if(ib.type==='vless-ws'){
+      const h=ib.cfHost||server;const p=encodeURIComponent(ib.wsPath||'/download/update.bin');
+      uris=[
+        {label:'VLESS+WS TLS（CF 443）',uri:`vless://UUID@${h}:443?security=tls&sni=${h}&type=ws&path=${p}&host=${h}#${encodeURIComponent(ib.tag+'-TLS')}`},
+        {label:'VLESS+WS HTTP（CF 80）', uri:`vless://UUID@${h}:80?security=none&type=ws&path=${p}&host=${h}#${encodeURIComponent(ib.tag+'-HTTP')}`},
+      ];
+    } else if(ib.type==='trojan'){
+      uris=[{label:'Trojan URI',uri:`trojan://${ib.trojanPass||'PASSWORD'}@${server}:${ib.port}?security=tls#${encodeURIComponent(ib.tag)}`}];
+    } else {
+      uris=[
+        {label:'SOCKS5',uri:`socks5://${encodeURIComponent(ib.mxUser)}:${encodeURIComponent(ib.mxPass)}@${server}:${ib.port}`},
+        {label:'HTTP',  uri:`http://${encodeURIComponent(ib.mxUser)}:${encodeURIComponent(ib.mxPass)}@${server}:${ib.port}`},
+      ];
+    }
+    return `<div style="border:1px solid var(--border2);border-radius:5px;padding:8px;background:var(--bg4)">
+      <div style="font-size:10px;color:var(--text3);margin-bottom:5px">${esc(ib.tag)} &nbsp;·&nbsp; :${ib.port}</div>
+      ${uris.map(u=>`<div style="margin-bottom:5px"><div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px">${u.label}</div>
+        <div style="display:flex;gap:4px"><input value="${esc(u.uri)}" readonly style="font-size:10px;flex:1;color:var(--green)">
+        <button class="gen-btn" onclick="navigator.clipboard.writeText('${esc(u.uri)}').then(()=>{this.textContent='✓';setTimeout(()=>this.textContent='复制',1500)})">复制</button></div></div>`).join('')}
+    </div>`;
+  }).join('');
+}
+
+// ===== 键盘快捷键 =====
+document.addEventListener('keydown',e=>{
+  const tag=document.activeElement?.tagName;
+  const inInput=tag==='INPUT'||tag==='SELECT';
+  const inTextarea=tag==='TEXTAREA';
+  const inPreview=document.activeElement?.id==='preview';
+
+  // Ctrl+A：焦点在预览 textarea 时只选代码，不选整页
+  if((e.ctrlKey||e.metaKey)&&e.key==='a'&&inPreview){
+    e.preventDefault();
+    document.getElementById('preview').select();
+    return;
+  }
+
+  // Ctrl+C：焦点不在任何输入框时，复制配置 JSON
+  if((e.ctrlKey||e.metaKey)&&e.key==='c'&&!inInput&&!inTextarea){
+    copyConfig();
+    return;
+  }
+
+  // Ctrl+V：焦点不在任何输入框时，打开粘贴导入并自动读入剪贴板
+  if((e.ctrlKey||e.metaKey)&&e.key==='v'&&!inInput&&!inTextarea){
+    e.preventDefault();
+    navigator.clipboard.readText().then(text=>{
+      openPaste();
+      setTimeout(()=>{
+        const ta=document.getElementById('pasteText');
+        if(ta&&text){
+          ta.value=text;
+          ta.dispatchEvent(new Event('input'));
+          document.getElementById('paste-result').innerHTML=
+            '<span style="color:var(--text3);font-size:11px">✓ 已自动填入剪贴板，确认后点「解析并导入」</span>';
+        }
+      },60);
+    }).catch(()=>openPaste());
+    return;
+  }
+});
+
+// ===== BULK OPS (shift multi-select) =====
+function renderBulkBar(){
+  const bar=document.getElementById('bulk-bar');
+  if(!bar)return;
+  if(obSelected.size===0){bar.style.display='none';return;}
+  bar.style.display='flex';
+  document.getElementById('bulk-count').textContent=obSelected.size;
+}
+function clearObSel(){obSelected.clear();obLastClickedId=null;renderBulkBar();renderOutbounds();}
+function bulkDelete(){
+  if(!confirm(`确定删除选中的 ${obSelected.size} 个出站？`))return;
+  outbounds=outbounds.filter(o=>!obSelected.has(o.id));
+  obSelected.clear();obLastClickedId=null;
+  renderBulkBar();renderAll();
+}
+function openBulkReplace(){
+  document.getElementById('bulk-replace-count').textContent=obSelected.size;
+  document.getElementById('bulkReplaceText').value='';
+  document.getElementById('bulkReplaceModal').classList.add('open');
+}
+document.getElementById('bulkReplaceModal').addEventListener('click',e=>{if(e.target===e.currentTarget)e.target.classList.remove('open');});
+function doBulkReplace(){
+  const text=document.getElementById('bulkReplaceText').value.trim();
+  if(!text){alert('请粘贴节点列表');return;}
+  const nodes=text.split('\n').map(l=>l.trim()).filter(l=>l&&!l.startsWith('#')).map(line=>{
+    const parts=line.split(':');
+    if(parts.length<2)return null;
+    return{host:parts[0],port:parseInt(parts[1])||1080,user:parts[2]||'',pass:parts.slice(3).join(':')||''};
+  }).filter(Boolean);
+  if(!nodes.length){alert('没有识别到有效节点');return;}
+  // 维持出站在列表中的原始顺序
+  const selectedIds=outbounds.filter(o=>obSelected.has(o.id)).map(o=>o.id);
+  const count=Math.min(nodes.length,selectedIds.length);
+  for(let i=0;i<count;i++){
+    const idx=outbounds.findIndex(o=>o.id===selectedIds[i]);
+    if(idx<0)continue;
+    const ob=outbounds[idx];
+    const n=nodes[i];
+    // 只更新地址/端口/账号密码，保留 Tag 名和其他字段
+    ob.address=n.host;
+    ob.port=n.port;
+    if(ob.type==='socks5'||ob.type==='http'){ob.socksUser=n.user;ob.socksPass=n.pass;}
+    else if(ob.type==='ss'){ob.password=n.pass;}
+  }
+  document.getElementById('bulkReplaceModal').classList.remove('open');
+  obSelected.clear();obLastClickedId=null;
+  renderBulkBar();renderAll();
+  setTimeout(()=>alert(`✓ 已批量替换 ${count} 个出站（Tag 保留）`),100);
+}
+
+renderAll();
+</script>
+</body>
+</html>
